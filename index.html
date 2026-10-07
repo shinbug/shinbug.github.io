@@ -1,46 +1,512 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#07090f"><title>Haptic Control</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f1f3f4">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Haptic">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAACyElEQVR42u3dUW7iMBRA0WKxB6R2me0y2CZSu4t+VEKIUpqA7djvnfs1o5GAxifPCcMwu9f3zxfpVsUhEByCQ3AIDsEhOASH4BAcgkOCQ3AIDsEhOASH4BAcgkNwSHAIDsEhOASH4BAcgkNwCA4JDsEhOASH4BAcgkNwCA7BITgkOASH4BAcgkNjtQ/5U52Oh59fvH18WeOH2wX7z3jOLC5DxLYiONbMjIV/qviT4y8BZKTGsWT5EXHNITgER609RSYHRnAIDsMADpjgEBzGAByCI+LYMG9MDsEhOOpuDXaWJe0dghZkY3wwMey20nl5TsfD5TS6+i0cA+0pg5y4s/vIe0Faa+UCf3Y1Mo5u8yPq5W2Jd8b33FNif3Y19fscbmjhoDAHjrV7StMtZtWSz+ijOKcNNjhADI3jsfuURjtLhpFjchgecAyzYBP5KGGWcLT3vmwrczTaX6DPYmsOHK3Hhhta1xz9BtW/WKfgWPIsWOdNIYCPJh8TvPqxW8/8tF8WWPc4/67+V032PyEWHpRayO4/ztWDdD4adX2U2WW40Wj38srsB275ubLJ7tP/SSuugruV5rjnvSSCw6VxUBxrF2OrxZsUjcmhLjg6nx8tnu7OxvHkntLt4FR8ojL+gt18lhkHdYeXPfT7HB18PPn4m6tq9wImeIc05E1HzrfwXZAKjuhnORzTbENw5NVgcgiOlC3fCDJ/1MjksLPAITjq7izJP75qcggOlx1wNLpnSbinmByCQ3BMtCXBYY3hEBzKNm/gsLPAITgEh20IDusNh+AwY+Cw6nAIDuWdLnAIDoMBDnTgIAAOaDYt4zf7LOn87xIyzxI4ZFsRHIJDcAgOwSE4BIfgEBwSHIJDcAgOwSE4BIfgEByCQ4JDcAgOwSE4BIfgEByCQ3BIcAgOwSE4BIfgEByCQ3AIDsEhwSE4BIfgEBwarG9xSOm/lktdGQAAAABJRU5ErkJggg==">
+<title>Haptic Control</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#07090f;--panel:rgba(15,19,30,.78);--line:rgba(255,255,255,.09);--text:#f4f7ff;--muted:#8d97aa;--accent:#7c5cff;--accent2:#21d4fd;--good:#39e58c;--bad:#ff5d73;--shadow:0 24px 70px rgba(0,0,0,.45)}
-*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}body{overflow-x:hidden}body:before,body:after{content:"";position:fixed;pointer-events:none;border-radius:50%;filter:blur(80px);opacity:.22;z-index:-1}body:before{width:360px;height:360px;background:#6d4aff;left:-120px;top:-100px}body:after{width:330px;height:330px;background:#00b8ff;right:-120px;bottom:-90px}
-button,input,textarea{font:inherit}button{border:0;color:inherit;cursor:pointer}.hidden{display:none!important}.wrap{width:min(100% - 18px,900px);margin:0 auto;padding:12px 0 34px}.glass{background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
-.login{min-height:100dvh;display:grid;place-items:center;padding:22px}.login-card{width:min(100%,420px);padding:28px;border-radius:28px;animation:rise .55s cubic-bezier(.2,.8,.2,1)}.logo,.brand{display:flex;align-items:center;gap:12px}.logo{margin-bottom:26px}.logo-mark,.mini-logo{display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent2));font-weight:900;box-shadow:0 0 35px rgba(124,92,255,.35)}.logo-mark{width:46px;height:46px;border-radius:15px}.mini-logo{width:42px;height:42px;border-radius:14px}h1{font-size:25px;margin:0;letter-spacing:-.03em}.sub{color:var(--muted);font-size:12px}.field{display:flex;gap:8px;margin-top:20px}input,textarea{width:100%;background:rgba(255,255,255,.045);border:1px solid var(--line);outline:0;color:var(--text);border-radius:17px;transition:.2s}input{height:54px;padding:0 16px}input:focus,textarea:focus{border-color:rgba(124,92,255,.75);box-shadow:0 0 0 4px rgba(124,92,255,.1)}.primary{height:54px;padding:0 20px;border-radius:17px;background:linear-gradient(135deg,var(--accent),#5e7cff);font-weight:800;box-shadow:0 12px 28px rgba(92,75,220,.3);transition:transform .15s,filter .15s}.primary:active{transform:scale(.97)}.error{color:var(--bad);font-size:13px;margin:10px 3px 0;min-height:18px}
-header{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}.title{font-weight:900;letter-spacing:-.03em}.status{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}.dot.good{background:var(--good);box-shadow:0 0 15px rgba(57,229,140,.8);animation:pulse 1.8s infinite}.dot.bad{background:var(--bad);box-shadow:0 0 12px rgba(255,93,115,.5)}.lock{height:40px;padding:0 13px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.045);font-size:12px;font-weight:800}
-.grid{display:grid;gap:14px}.card{border-radius:25px;padding:16px}.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}.card-title{font-size:13px;text-transform:uppercase;letter-spacing:.11em;color:#aeb7c8;font-weight:850}textarea{min-height:145px;padding:17px;resize:vertical;line-height:1.5}.sendrow{display:flex;gap:10px;margin-top:10px}.sendrow .primary{flex:1}.counter{display:grid;place-items:center;min-width:54px;height:54px;border:1px solid var(--line);border-radius:17px;color:var(--muted);font-size:12px}.log{display:grid;gap:9px}.event{display:grid;grid-template-columns:9px 1fr auto;gap:10px;align-items:start;padding:12px 11px;border:1px solid rgba(255,255,255,.06);border-radius:16px;background:rgba(255,255,255,.025);animation:fade .35s ease}.event .bar{width:7px;height:7px;border-radius:50%;background:var(--accent);margin-top:5px}.event.good .bar{background:var(--good)}.event.bad .bar{background:var(--bad)}.event-main{font-size:13px}.event-time{font-size:11px;color:var(--muted);white-space:nowrap}.msg{margin-top:5px;color:#aeb7c8;font-size:12px;word-break:break-word}.empty{padding:24px;text-align:center;color:var(--muted);font-size:13px}.toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,20px);opacity:0;padding:12px 16px;border-radius:14px;background:#171c2a;border:1px solid var(--line);box-shadow:var(--shadow);font-size:13px;z-index:20;transition:.25s}.toast.show{opacity:1;transform:translate(-50%,0)}.busy{opacity:.65;pointer-events:none}
-@keyframes rise{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}@keyframes pulse{50%{opacity:.45;transform:scale(.8)}}
-@media(min-width:700px){.grid{grid-template-columns:1.05fr .95fr}.compose{grid-row:span 2}.card{padding:23px}}@media(max-width:480px){.login-card{padding:22px;border-radius:24px}.field{flex-direction:column}.field .primary{width:100%}.sendrow{position:sticky;bottom:8px}.primary{min-height:54px}.event{grid-template-columns:8px 1fr}.event-time{grid-column:2}.lock{padding:0 11px}}
-</style></head>
+:root{
+  color-scheme:light;
+  --bg:#f1f3f4; --panel:#ffffff; --line:#dadce0; --text:#202124; --dim:#5f6368;
+  --accent:#1a73e8; --accent-d:#1765cc; --ok:#1e8e3e; --bad:#d93025; --warn:#f9ab00;
+  --r:20px;
+  --shadow:0 1px 2px rgba(60,64,67,.25),0 1px 3px 1px rgba(60,64,67,.12);
+  --head:'Google Sans','Roboto',system-ui,sans-serif;
+  --body:'Roboto',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:var(--body);overflow-x:hidden}
+body{padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0)}
+
+.bg{position:fixed;inset:0;z-index:-1;background:var(--bg)}
+.bg::before{content:"";position:absolute;left:0;right:0;top:0;height:190px;background:linear-gradient(#e8f0fe,var(--bg))}
+
+.wrap{max-width:480px;margin:0 auto;padding:18px 16px 28px;min-height:100%;display:flex;flex-direction:column;gap:14px}
+.hidden{display:none!important}
+
+/* cards */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px;box-shadow:var(--shadow)}
+h1,h2{font-family:var(--head);margin:0;font-weight:600}
+h1{font-size:21px;font-weight:500}
+h2{font-size:15px;color:var(--dim);font-weight:500}
+
+/* header */
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;animation:rise .6s cubic-bezier(.2,.8,.2,1) both}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;
+  background:var(--accent)}
+.logo svg{width:24px;height:24px}
+.pill{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;color:var(--dim);
+  padding:5px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;margin-top:4px;transition:.3s}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--warn);position:relative}
+.dot::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid currentColor;opacity:0;color:inherit}
+.pill.ok .dot{background:var(--ok);color:var(--ok)}
+.pill.ok .dot::after{animation:ping 2s ease-out infinite}
+.pill.bad .dot{background:var(--bad)}
+.pill.ok{color:var(--ok);border-color:rgba(30,142,60,.35)}
+.pill.bad{color:var(--bad);border-color:rgba(217,48,37,.4)}
+@keyframes ping{0%{transform:scale(.6);opacity:.9}100%{transform:scale(2.2);opacity:0}}
+
+.iconbtn{width:46px;height:46px;border-radius:50%;border:1px solid var(--line);background:#fff;color:var(--text);box-shadow:var(--shadow);
+  display:grid;place-items:center;cursor:pointer;transition:transform .2s,background .2s,border-color .2s}
+.iconbtn:hover{border-color:var(--bad);background:#fce8e6}
+.iconbtn.gear:hover{border-color:var(--accent);background:#e8f0fe}
+.iconbtn.gear:hover svg{transform:rotate(60deg)}.iconbtn svg{transition:transform .4s}
+#settings input{display:block}
+#settings{animation:rise .4s both}
+.iconbtn:active{transform:scale(.88)}
+.iconbtn svg{width:20px;height:20px}
+
+@keyframes rise{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* login */
+#login{margin:auto 0;animation:rise .7s cubic-bezier(.2,.8,.2,1) both;text-align:center;padding:28px 22px}
+#login .logo{width:72px;height:72px;border-radius:24px;margin:0 auto 18px;animation:glow 3s ease-in-out infinite}
+#login .logo svg{width:38px;height:38px}
+@keyframes glow{0%,100%{box-shadow:0 0 0 0 rgba(26,115,232,.35)}50%{box-shadow:0 0 0 14px rgba(26,115,232,0)}}
+#login p{color:var(--dim);font-size:14px;margin:8px 0 20px;line-height:1.5}
+input,textarea{width:100%;background:#fff;border:1px solid #bdc1c6;color:var(--text);
+  border-radius:16px;padding:15px 16px;font:500 16px var(--body);outline:none;transition:border-color .2s,box-shadow .2s}
+input:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(26,115,232,.2)}
+textarea{resize:none;min-height:120px;line-height:1.45}
+.btn{width:100%;border:0;border-radius:26px;padding:16px;margin-top:12px;font:500 16px var(--head);color:#fff;cursor:pointer;
+  background:var(--accent);box-shadow:0 1px 3px rgba(26,115,232,.45);
+  transition:transform .15s,box-shadow .2s,opacity .2s;position:relative;overflow:hidden}
+.btn:hover{background:var(--accent-d);box-shadow:0 2px 8px rgba(26,115,232,.45)}
+.btn:active{transform:scale(.97)}
+.btn:disabled{opacity:.55;cursor:not-allowed;box-shadow:none}
+.err{color:var(--bad);font-size:13.5px;min-height:20px;margin-top:10px}
+.shake{animation:shake .45s}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+
+/* composer */
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.count{font-size:12px;color:var(--dim)}
+.ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,.45);transform:scale(0);animation:rip .6s ease-out forwards;pointer-events:none}
+@keyframes rip{to{transform:scale(4);opacity:0}}
+.btn.sending::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgba(255,255,255,.35),transparent 70%);
+  transform:translateX(-100%);animation:sweep 1s linear infinite}
+@keyframes sweep{to{transform:translateX(100%)}}
+.btn.sent{background:var(--ok)}
+.btn.failed{background:var(--bad)}
+
+/* haptic waves */
+.waves{position:relative;height:0;overflow:visible}
+.wave{position:absolute;left:50%;top:-38px;width:20px;height:20px;margin-left:-10px;border-radius:50%;
+  border:2px solid var(--accent);opacity:0;pointer-events:none;animation:wave 1.2s ease-out forwards}
+@keyframes wave{0%{transform:scale(1);opacity:.9}100%{transform:scale(24);opacity:0}}
+
+/* stats */
+.stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.stat{padding:14px 10px;text-align:center;border-radius:18px}
+.stat b{display:block;font:500 24px var(--head);color:var(--accent)}
+.stat span{font-size:12px;color:var(--dim)}
+
+/* history */
+.hist{display:flex;flex-direction:column;gap:8px;margin-top:12px;max-height:340px;overflow-y:auto;padding-right:2px}
+.item{display:flex;gap:12px;padding:12px;border-radius:16px;background:#f8f9fa;border:1px solid var(--line);animation:rise .4s both}
+.item .ic{width:34px;height:34px;flex:none;border-radius:11px;display:grid;place-items:center;font-size:16px}
+.item .tx{min-width:0;flex:1}
+.item .t1{font-size:14px;font-weight:600}
+.item .t2{font-size:13px;color:var(--dim);overflow-wrap:anywhere;margin-top:2px}
+.item time{font-size:11.5px;color:var(--dim);white-space:nowrap}
+.k-sent .ic{background:#e8f0fe}
+.k-ok .ic{background:#e6f4ea}
+.k-bad .ic{background:#fce8e6}
+.k-info .ic{background:#fef7e0}
+.empty{text-align:center;color:var(--dim);font-size:14px;padding:22px 0}
+.link{background:none;border:0;color:var(--dim);font:500 13px var(--body);cursor:pointer;padding:4px 8px;border-radius:8px}
+.link:hover{color:var(--text)}
+
+/* toast */
+#toast{position:fixed;left:50%;bottom:calc(22px + env(safe-area-inset-bottom,0px));transform:translate(-50%,140%);
+  background:#323232;color:#fff;box-shadow:0 3px 10px rgba(0,0,0,.3);padding:12px 20px;border-radius:999px;font-size:14px;font-weight:500;
+  transition:transform .4s cubic-bezier(.2,1.2,.3,1);z-index:10;white-space:nowrap;max-width:92vw;overflow:hidden;text-overflow:ellipsis}
+#toast.show{transform:translate(-50%,0)}
+
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+/* device status */
+.dev{display:flex;align-items:center;gap:14px;padding:14px 18px}
+.dev .d{width:12px;height:12px;border-radius:50%;background:#bdc1c6;position:relative;flex:none}
+.dev.on .d{background:var(--ok)}
+.dev.on .d::after{content:"";position:absolute;inset:-5px;border-radius:50%;border:2px solid var(--ok);opacity:0;animation:ping 2s ease-out infinite}
+.dev.off .d{background:var(--bad)}
+.devtx{font:500 15px var(--head)}
+.devsub{font-size:13px;color:var(--dim);margin-top:2px}
+.dev.flash{animation:flash 1.3s ease-out}
+@keyframes flash{0%{box-shadow:0 0 0 0 rgba(30,142,60,.55)}100%{box-shadow:0 0 0 22px rgba(30,142,60,0)}}
+/* filters */
+select{background:#fff;border:1px solid #bdc1c6;color:var(--text);font:500 14px var(--body);outline:none;-webkit-appearance:none;appearance:none}
+.filters{display:flex;gap:8px;margin-top:12px;align-items:center}
+.filters input,.filters select{flex:1;min-width:0;width:auto;min-height:42px;padding:9px 12px;font-size:14px;border-radius:12px}
+.cnt{font-size:12px;color:var(--dim);margin-top:10px}
+.link.danger{color:var(--bad);font-weight:500}
+</style>
+</head>
 <body>
-<section id="login" class="login"><div class="login-card glass"><div class="logo"><div class="logo-mark">H</div><div><h1>Haptic Control</h1><div class="sub">Private control panel</div></div></div><div class="field"><input id="password" type="password" autocomplete="current-password" placeholder="Enter password"><button id="loginBtn" class="primary">Enter</button></div><div id="loginError" class="error"></div></div></section>
-<main id="app" class="wrap hidden"><header><div class="brand"><div class="mini-logo">H</div><div><div class="title">Haptic Control</div><div class="status"><span id="statusDot" class="dot"></span><span id="statusText">Checking connection…</span></div></div></div><button id="lockBtn" class="lock">LOCK</button></header>
-<div class="grid"><section class="card glass compose"><div class="card-head"><div class="card-title">Send message</div><div id="counter" class="sub">0 / 500</div></div><textarea id="message" maxlength="500" placeholder="Type a message…"></textarea><div class="sendrow"><div id="charCount" class="counter">0</div><button id="sendBtn" class="primary">Send message</button></div></section>
-<section class="card glass"><div class="card-head"><div class="card-title">Connection</div><div id="connLabel" class="sub">—</div></div><div class="status"><span id="connDot" class="dot"></span><span id="connDetail">Waiting for first check</span></div></section>
-<section class="card glass"><div class="card-head"><div class="card-title">Activity</div><button id="clearBtn" class="lock">CLEAR</button></div><div id="log" class="log"></div></section></div></main><div id="toast" class="toast"></div>
+<div class="bg"></div>
+
+<main class="wrap">
+
+  <!-- LOGIN -->
+  <section id="login" class="card hidden">
+    <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h3l2-6 4 12 3-9 2 3h6"/></svg></div>
+    <h1>Haptic Control</h1>
+    <p id="loginHint">Enter your password to open the panel.</p>
+    <input id="pw" type="password" placeholder="Password" autocomplete="current-password" autocapitalize="off">
+    <input id="pw2" type="password" placeholder="Confirm password" class="hidden" style="margin-top:10px" autocomplete="new-password">
+    <div class="err" id="loginErr"></div>
+    <button class="btn" id="loginBtn">Unlock</button>
+  </section>
+
+  <!-- APP -->
+  <section id="app" class="hidden" style="display:flex;flex-direction:column;gap:14px">
+    <header>
+      <div class="brand">
+        <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12h3l2-6 4 12 3-9 2 3h6"/></svg></div>
+        <div>
+          <h1>Haptic Control</h1>
+          <div class="pill" id="pill"><span class="dot"></span><span id="pillTx">Checking…</span></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px">
+      <button class="iconbtn gear" id="gearBtn" aria-label="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      </button>
+      <button class="iconbtn" id="lockBtn" aria-label="Lock">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="3"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+      </button>
+      </div>
+    </header>
+
+    <div class="card hidden" id="settings">
+      <div class="top"><h2>Adafruit IO settings</h2><button class="link" id="closeSet">Close</button></div>
+      <p style="color:var(--dim);font-size:13px;line-height:1.5;margin:0 0 12px">Saved only in this browser. Nothing is stored in the site's code.</p>
+      <input id="cUser" placeholder="Adafruit IO username" autocapitalize="off" autocomplete="off" spellcheck="false">
+      <input id="cKey" type="password" placeholder="Adafruit IO key" autocapitalize="off" autocomplete="off" spellcheck="false" style="margin-top:10px">
+      <input id="cFeed" placeholder="Message feed key (e.g. messages)" autocapitalize="off" autocomplete="off" spellcheck="false" style="margin-top:10px">
+      <input id="cStatus" placeholder="Device status feed key (optional)" autocapitalize="off" autocomplete="off" spellcheck="false" style="margin-top:10px">
+      <p style="color:var(--dim);font-size:12.5px;line-height:1.45;margin:8px 2px 0">The device sends a heartbeat to the status feed. That is how this page knows it is online.</p>
+      <div class="err" id="setErr"></div>
+      <button class="btn" id="saveSet" style="margin-top:4px">Save and test</button>
+      <button class="link" id="wipeSet" style="margin-top:10px;width:100%">Remove saved settings</button>
+    </div>
+
+    <div class="card dev off" id="dev">
+      <span class="d"></span>
+      <div><div class="devtx" id="devTx">Device status not set up</div><div class="devsub" id="devSub">Add a status feed in settings</div></div>
+    </div>
+
+    <div class="card" style="animation:rise .6s .08s both">
+      <div class="top"><h2>Send a message</h2><span class="count" id="count">0 / 200</span></div>
+      <textarea id="msg" maxlength="200" placeholder="Type your message…"></textarea>
+      <div class="waves" id="waves"></div>
+      <button class="btn" id="sendBtn">Send message</button>
+    </div>
+
+    <div class="stats" style="animation:rise .6s .16s both">
+      <div class="card stat"><b id="stSent">0</b><span>Sent</span></div>
+      <div class="card stat"><b id="stFail">0</b><span>Failed</span></div>
+      <div class="card stat"><b id="stLast">–</b><span>Last sent</span></div>
+    </div>
+
+    <div class="card" style="animation:rise .6s .24s both">
+      <div class="top" style="margin:0"><h2>Activity</h2><button class="link" id="clearBtn">Clear all</button></div>
+      <div class="filters">
+        <input type="date" id="fDay" aria-label="Day">
+        <select id="fHour" aria-label="Hour"><option value="">Any hour</option></select>
+        <button class="link" id="fReset">Reset</button>
+      </div>
+      <div class="cnt" id="cnt"></div>
+      <div class="hist" id="hist" style="margin-top:8px"></div>
+    </div>
+  </section>
+</main>
+<div id="toast"></div>
+
 <script>
-const PASSWORD_HASH="a2299ab3a09f57f5a4c211d1e8bcd3e1bbce0d648ff7cf573e016f3262832585";
-const DEFAULT_FEED="haptic",SESSION_KEY="haptic_session_v2",LOG_KEY="haptic_activity_v2",CONFIG_KEY="haptic_aio_config_v2",MAX_LOG=100;
-const $=id=>document.getElementById(id);
-async function sha256(s){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
-function now(){return new Intl.DateTimeFormat([], {dateStyle:"short",timeStyle:"medium"}).format(new Date())}
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
-function getLog(){try{return JSON.parse(localStorage.getItem(LOG_KEY)||"[]")}catch{return[]}}function saveLog(a){localStorage.setItem(LOG_KEY,JSON.stringify(a.slice(-MAX_LOG)))}
-function addEvent(type,text,good=true){const a=getLog();a.push({type,text,time:now(),good});saveLog(a);renderLog()}
-function renderLog(){const a=getLog().slice().reverse();$("log").innerHTML=a.length?a.map(e=>`<div class="event ${e.good?"good":"bad"}"><span class="bar"></span><div><div class="event-main">${esc(e.type)}</div>${e.text?`<div class="msg">${esc(e.text)}</div>`:""}</div><div class="event-time">${esc(e.time)}</div></div>`).join(""):"<div class='empty'>No activity yet.</div>"}
-function toast(s){const t=$("toast");t.textContent=s;t.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("show"),2200)}
-function setStatus(ok,detail){$("statusDot").className="dot "+(ok?"good":"bad");$("statusText").textContent=ok?"ONLINE":"OFFLINE";$("connDot").className="dot "+(ok?"good":"bad");$("connLabel").textContent=ok?"Connected":"Unavailable";$("connDetail").textContent=detail}
-function cfg(){try{const x=JSON.parse(localStorage.getItem(CONFIG_KEY)||"{}");return{x:x.username||"",key:x.key||"",feed:x.feed||DEFAULT_FEED}}catch{return{x:"",key:"",feed:DEFAULT_FEED}}}
-function saveCfg(c){localStorage.setItem(CONFIG_KEY,JSON.stringify(c))}
-async function checkAIO(){const c=cfg();if(!c.x||!c.key){setStatus(false,"Adafruit IO credentials not configured");return false}try{const r=await fetch(`https://io.adafruit.com/api/v2/${encodeURIComponent(c.x)}/feeds/${encodeURIComponent(c.feed)}`,{headers:{"X-AIO-Key":c.key}});if(!r.ok)throw Error("HTTP "+r.status);setStatus(true,"Feed reachable");return true}catch(e){setStatus(false,e.message||"Connection failed");return false}}
-async function sendMessage(){const msg=$("message").value.trim();if(!msg)return toast("Type a message first");let c=cfg();if(!c.x||!c.key){const username=prompt("Adafruit IO username:");if(!username)return;const key=prompt("Adafruit IO key:");if(!key)return;const feed=prompt("Feed key:",DEFAULT_FEED)||DEFAULT_FEED;saveCfg({username,key,feed});c=cfg()}
-$("sendBtn").classList.add("busy");$("sendBtn").textContent="Sending…";try{const r=await fetch(`https://io.adafruit.com/api/v2/${encodeURIComponent(c.x)}/feeds/${encodeURIComponent(c.feed)}/data`,{method:"POST",headers:{"Content-Type":"application/json","X-AIO-Key":c.key},body:JSON.stringify({value:msg})});if(!r.ok){let d="HTTP "+r.status;try{const j=await r.json();d=j.error||j.detail||d}catch{}throw Error(d)}addEvent("Message sent",msg,true);$("message").value="";updateCount();setStatus(true,"Message delivered");toast("Message sent ✓")}catch(e){addEvent("Message failed",e.message||"Unknown error",false);setStatus(false,e.message||"Send failed");toast("Message failed")}finally{$("sendBtn").classList.remove("busy");$("sendBtn").textContent="Send message"}}
-function updateCount(){const n=$("message").value.length;$("charCount").textContent=n;$("counter").textContent=`${n} / 500`}
-function openApp(){$("login").classList.add("hidden");$("app").classList.remove("hidden");renderLog();updateCount();checkAIO()}
-function lock(){localStorage.removeItem(SESSION_KEY);$("app").classList.add("hidden");$("login").classList.remove("hidden");$("password").value="";$("loginError").textContent="";$("password").focus()}
-$("loginBtn").onclick=async()=>{const p=$("password").value;if(!p)return;const h=await sha256(p);if(h===PASSWORD_HASH){localStorage.setItem(SESSION_KEY,"1");openApp()}else{$("loginError").textContent="Wrong password";$("password").select()}};
-$("password").addEventListener("keydown",e=>{if(e.key==="Enter")$("loginBtn").click()});$("lockBtn").onclick=lock;$("sendBtn").onclick=sendMessage;$("message").addEventListener("input",updateCount);$("clearBtn").onclick=()=>{if(confirm("Clear local activity history?")){localStorage.removeItem(LOG_KEY);renderLog();toast("History cleared")}};
-window.addEventListener("online",()=>{if(!$('app').classList.contains('hidden')){addEvent('Browser online','Connection restored',true);checkAIO()}});window.addEventListener("offline",()=>{if(!$('app').classList.contains('hidden')){addEvent('Browser offline','Network connection lost',false);setStatus(false,"Browser is offline")}});
-if(localStorage.getItem(SESSION_KEY)==="1")openApp();else $("password").focus();
-</script></body></html>
+/* Adafruit IO settings are entered inside the site (gear icon) and stored only in this browser. */
+let cfg = LS_get("hc_cfg", {user:"",key:"",feed:"",status:""});
+function LS_get(k,d){ try{ const v=localStorage.getItem(k); return v===null?d:JSON.parse(v) }catch(e){ return d } }
+const isConfigured = () => !!(cfg.user && cfg.key && cfg.feed);
+const statusBase = () => `https://io.adafruit.com/api/v2/${encodeURIComponent(cfg.user)}/feeds/${encodeURIComponent(cfg.status)}`;
+const apiBase = () => `https://io.adafruit.com/api/v2/${encodeURIComponent(cfg.user)}/feeds/${encodeURIComponent(cfg.feed)}`;
+
+const $ = id => document.getElementById(id);
+/* Settings, password hash and login session are saved in localStorage and mirrored to IndexedDB,
+   so they survive closing the app, reloads, and the browser clearing one of the two. */
+const KEEP=["hc_cfg","hc_hash","hc_session","hc_lastseen"];
+const idb=()=>new Promise((res,rej)=>{ const r=indexedDB.open("hc",1); r.onupgradeneeded=()=>r.result.createObjectStore("kv"); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error) });
+async function mirror(){ try{ const db=await idb(), st=db.transaction("kv","readwrite").objectStore("kv");
+  KEEP.forEach(k=>{ const v=localStorage.getItem(k); v===null?st.delete(k):st.put(v,k) }) }catch(e){} }
+async function restore(){ try{ const db=await idb();
+  await Promise.all(KEEP.map(k=>new Promise(res=>{ if(localStorage.getItem(k)!==null) return res();
+    const q=db.transaction("kv").objectStore("kv").get(k);
+    q.onsuccess=()=>{ if(q.result!=null) localStorage.setItem(k,q.result); res() }; q.onerror=()=>res() }))) }catch(e){} }
+const LS = {
+  get(k,d){ try{ const v=localStorage.getItem(k); return v===null?d:JSON.parse(v) }catch(e){ return d } },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); if(KEEP.includes(k)) mirror() }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k); if(KEEP.includes(k)) mirror() }catch(e){} }
+};
+try{ navigator.storage && navigator.storage.persist && navigator.storage.persist() }catch(e){}
+
+async function sha256(s){
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+const storedHash = () => LS.get("hc_hash", "");
+
+/* ---------- toast ---------- */
+let toastT;
+function toast(t){
+  const el=$("toast"); el.textContent=t; el.classList.add("show");
+  clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove("show"),2400);
+}
+
+/* ---------- auth ---------- */
+function showLogin(){
+  $("app").classList.add("hidden"); $("login").classList.remove("hidden");
+  const first = !storedHash();
+  $("pw2").classList.toggle("hidden", !first);
+  $("loginHint").textContent = first ? "First time here. Create a password to protect this panel." : "Enter your password to open the panel.";
+  $("loginBtn").textContent = first ? "Create password" : "Unlock";
+  $("pw").value=""; $("pw2").value=""; $("loginErr").textContent="";
+}
+function showApp(){
+  $("login").classList.add("hidden"); $("app").classList.remove("hidden");
+  fillHours(); renderHist(); renderStats(); checkConn(true); startDevice();
+  if(!isConfigured()) setTimeout(()=>openSettings(true),300);
+}
+function newSession(){
+  const a=new Uint8Array(16); crypto.getRandomValues(a);
+  LS.set("hc_session",[...a].map(b=>b.toString(16).padStart(2,"0")).join(""));
+}
+async function doLogin(){
+  const err=$("loginErr"), pw=$("pw").value; err.textContent="";
+  if(!pw){ err.textContent="Enter a password."; return }
+  const first=!storedHash();
+  if(first){
+    if(pw.length<4){ err.textContent="Use at least 4 characters."; return }
+    if(pw!==$("pw2").value){ err.textContent="Passwords don't match."; return }
+    LS.set("hc_hash", await sha256(pw));
+  } else if(await sha256(pw)!==storedHash()){
+    err.textContent="Wrong password."; const l=$("login"); l.classList.remove("shake"); void l.offsetWidth; l.classList.add("shake"); return;
+  }
+  newSession(); log("info","Unlocked","Session started"); showApp();
+}
+function lock(){
+  LS.del("hc_session"); clearInterval(pingT); stopDevice(); showLogin(); toast("Locked");
+}
+
+/* ---------- history ---------- */
+const ICONS={sent:"📤",ok:"🟢",bad:"🔴",info:"🔔"};
+function log(kind,title,detail){
+  const h=LS.get("hc_hist",[]);
+  h.unshift({kind,title,detail:detail||"",ts:Date.now()});
+  LS.set("hc_hist",h.slice(0,500));
+  if(!$("app").classList.contains("hidden")) renderHist(true);
+}
+function fmt(ts){
+  const d=new Date(ts), t=d.toLocaleTimeString([], {hour:"numeric",minute:"2-digit",second:"2-digit"});
+  return d.toDateString()===new Date().toDateString()?t:d.toLocaleDateString([], {month:"short",day:"numeric"})+" "+t;
+}
+const ymd=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+function fillHours(){
+  const sel=$("fHour"); if(sel.options.length>1) return;
+  for(let h=0;h<24;h++){ const o=document.createElement("option"); o.value=h; o.textContent=new Date(2000,0,1,h).toLocaleTimeString([], {hour:"numeric"}); sel.appendChild(o) }
+}
+function renderHist(){
+  const box=$("hist"), all=LS.get("hc_hist",[]), day=$("fDay").value, hr=$("fHour").value;
+  const h=all.filter(x=>{ const d=new Date(x.ts); return (!day||ymd(d)===day)&&(hr===""||d.getHours()===+hr) });
+  const filtered=!!(day||hr!=="");
+  $("cnt").textContent=filtered?h.length+" of "+all.length+" events":all.length+" events";
+  box.textContent="";
+  if(!h.length){ const e=document.createElement("div"); e.className="empty"; e.textContent=filtered?"Nothing matches this day and hour.":"No activity yet. Send your first message."; box.appendChild(e); return }
+  h.forEach((x,i)=>{
+    const d=document.createElement("div"); d.className="item k-"+x.kind;
+    if(i===0) d.style.animationDelay="0s"; else d.style.animation="none";
+    const ic=document.createElement("div"); ic.className="ic"; ic.textContent=ICONS[x.kind]||"•";
+    const tx=document.createElement("div"); tx.className="tx";
+    const t1=document.createElement("div"); t1.className="t1"; t1.textContent=x.title; tx.appendChild(t1);
+    if(x.detail){ const t2=document.createElement("div"); t2.className="t2"; t2.textContent=x.detail; tx.appendChild(t2) }
+    const tm=document.createElement("time"); tm.textContent=fmt(x.ts);
+    d.append(ic,tx,tm); box.appendChild(d);
+  });
+}
+function renderStats(){
+  const s=LS.get("hc_stats",{sent:0,fail:0,last:0});
+  $("stSent").textContent=s.sent; $("stFail").textContent=s.fail;
+  $("stLast").textContent=s.last?new Date(s.last).toLocaleTimeString([], {hour:"numeric",minute:"2-digit"}):"–";
+}
+function bump(k){
+  const s=LS.get("hc_stats",{sent:0,fail:0,last:0});
+  if(k==="sent"){ s.sent++; s.last=Date.now() } else s.fail++;
+  LS.set("hc_stats",s); renderStats();
+}
+
+/* ---------- connection ---------- */
+let state="unknown", pingT;
+function setStatus(s,text){
+  const pill=$("pill"); pill.className="pill "+(s==="ok"?"ok":s==="bad"?"bad":"");
+  $("pillTx").textContent=text;
+  if(s!==state){
+    if(s==="ok") log("ok","Connected","Adafruit IO is reachable");
+    if(s==="bad") log("bad","Disconnected",text);
+    state=s;
+  }
+}
+async function checkConn(first){
+  if(!isConfigured()){ setStatus("bad","Not set up"); return }
+  if(!navigator.onLine){ setStatus("bad","Offline"); return }
+  try{
+    const r=await fetch(apiBase(),{headers:{"X-AIO-Key":cfg.key}});
+    if(r.ok) setStatus("ok","Adafruit IO connected");
+    else if(r.status===401||r.status===403) setStatus("bad","Bad Adafruit key");
+    else if(r.status===404) setStatus("bad","Feed not found");
+    else setStatus("bad","Error "+r.status);
+  }catch(e){ setStatus("bad","Can't reach Adafruit IO") }
+  if(first){ clearInterval(pingT); pingT=setInterval(()=>{ if(!document.hidden) checkConn() },30000) }
+}
+addEventListener("online",()=>checkConn());
+addEventListener("offline",()=>setStatus("bad","Offline"));
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden && !$("app").classList.contains("hidden")){ checkConn(); pollDevice() } });
+
+/* ---------- device presence (heartbeat feed) ---------- */
+const HB_WINDOW=90000;           // device counts as online if its last heartbeat is newer than this
+let hbTs=LS.get("hc_lastseen",0), devWas=null, hbT, tickT;
+function ago(ms){
+  const s=Math.max(0,Math.round(ms/1000));
+  return s<5?"just now":s<60?s+"s ago":s<3600?Math.floor(s/60)+" min ago":fmt(Date.now()-ms);
+}
+function renderDevice(){
+  const el=$("dev"); if(!el) return;
+  if(!cfg.status){ el.className="card dev off"; $("devTx").textContent="Device status not set up"; $("devSub").textContent="Add a status feed in settings"; devWas=null; return }
+  const online=hbTs>0 && Date.now()-hbTs<HB_WINDOW;
+  if(devWas!==null && online!==devWas){
+    if(online){ log("ok","Device online","Heartbeat received"); toast("Device is back online"); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
+    else log("bad","Device offline","No heartbeat for "+Math.round(HB_WINDOW/1000)+"s");
+  }
+  devWas=online;
+  el.classList.toggle("on",online); el.classList.toggle("off",!online);
+  $("devTx").textContent=online?"Device online":"Device offline";
+  $("devSub").textContent=online?"Last heartbeat "+ago(Date.now()-hbTs):(hbTs?"Last online "+fmt(hbTs)+" ("+ago(Date.now()-hbTs)+")":"No heartbeat yet");
+}
+async function pollDevice(){
+  if(!cfg.user||!cfg.key||!cfg.status||!navigator.onLine) return;
+  try{
+    const r=await fetch(statusBase()+"/data/last",{headers:{"X-AIO-Key":cfg.key}});
+    if(r.ok){ const d=await r.json(), t=d&&d.created_at?Date.parse(d.created_at):0; if(t&&t>hbTs){ hbTs=t; LS.set("hc_lastseen",t) } }
+  }catch(e){}
+  renderDevice();
+}
+function startDevice(){
+  stopDevice(); renderDevice();
+  tickT=setInterval(renderDevice,1000);
+  if(cfg.status){ pollDevice(); hbT=setInterval(()=>{ if(!document.hidden) pollDevice() },5000) }
+}
+function stopDevice(){ clearInterval(hbT); clearInterval(tickT); devWas=null }
+
+/* ---------- send ---------- */
+let sending=false;
+function waves(){
+  const w=$("waves");
+  for(let i=0;i<3;i++){
+    const e=document.createElement("span"); e.className="wave"; e.style.animationDelay=(i*.18)+"s";
+    w.appendChild(e); setTimeout(()=>e.remove(),1700);
+  }
+}
+function ripple(btn,ev){
+  const r=btn.getBoundingClientRect(), s=document.createElement("span"); s.className="ripple";
+  const x=(ev&&ev.clientX?ev.clientX-r.left:r.width/2), y=(ev&&ev.clientY?ev.clientY-r.top:r.height/2);
+  s.style.cssText=`left:${x-20}px;top:${y-20}px;width:40px;height:40px`;
+  btn.appendChild(s); setTimeout(()=>s.remove(),650);
+}
+async function send(ev){
+  const ta=$("msg"), text=ta.value.trim(), btn=$("sendBtn");
+  if(sending) return;
+  if(!text){ toast("Type a message first"); ta.focus(); return }
+  if(!isConfigured()){ toast("Add your Adafruit IO details first"); openSettings(true); return }
+  sending=true; btn.disabled=true; btn.classList.add("sending"); btn.textContent="Sending…"; ripple(btn,ev);
+  try{
+    const r=await fetch(apiBase()+"/data",{method:"POST",headers:{"X-AIO-Key":cfg.key,"Content-Type":"application/json"},body:JSON.stringify({value:text})});
+    if(!r.ok) throw new Error(r.status===429?"Rate limited, wait a moment":"Error "+r.status);
+    waves(); if(navigator.vibrate) navigator.vibrate(30);
+    log("sent","Message sent",text); bump("sent");
+    btn.classList.add("sent"); btn.textContent="Sent"; toast("Message sent");
+    ta.value=""; $("count").textContent="0 / 200";
+    setStatus("ok","Adafruit IO connected");
+  }catch(e){
+    const m=e.message==="Failed to fetch"?"Network error":e.message;
+    log("bad","Message failed",m+": "+text); bump("fail");
+    btn.classList.add("failed"); btn.textContent="Failed"; toast("Failed: "+m);
+  }
+  btn.classList.remove("sending");
+  setTimeout(()=>{ btn.classList.remove("sent","failed"); btn.textContent="Send message"; btn.disabled=false; sending=false },1400);
+}
+
+/* ---------- settings ---------- */
+function openSettings(focus){
+  $("cUser").value=cfg.user; $("cKey").value=cfg.key; $("cFeed").value=cfg.feed; $("cStatus").value=cfg.status||""; $("setErr").textContent="";
+  const el=$("settings"); el.classList.remove("hidden"); el.style.animation="none"; void el.offsetWidth; el.style.animation="";
+  if(focus){ el.scrollIntoView({behavior:"smooth",block:"center"}); setTimeout(()=>$(cUserOrKey()).focus(),350) }
+}
+const cUserOrKey = () => !cfg.user ? "cUser" : !cfg.key ? "cKey" : "cFeed";
+async function saveSettings(){
+  const u=$("cUser").value.trim(), k=$("cKey").value.trim(), f=$("cFeed").value.trim().toLowerCase(), st=$("cStatus").value.trim().toLowerCase(), err=$("setErr"), b=$("saveSet");
+  if(!u||!k||!f){ err.textContent="Fill in all three fields."; return }
+  const old=cfg; cfg={user:u,key:k,feed:f,status:st};
+  b.disabled=true; b.textContent="Testing…"; err.textContent="";
+  try{
+    const r=await fetch(apiBase(),{headers:{"X-AIO-Key":cfg.key}});
+    if(!r.ok) throw new Error(r.status===401||r.status===403?"Username or key is wrong.":r.status===404?"Feed not found. Check the feed key.":"Adafruit returned "+r.status);
+    if(st){ const r2=await fetch(statusBase(),{headers:{"X-AIO-Key":cfg.key}}); if(!r2.ok) throw new Error("Status feed not found. Check the feed key."); }
+  }catch(e){
+    cfg=old; err.textContent=e.message==="Failed to fetch"?"Can't reach Adafruit IO. Check your connection.":e.message;
+    b.disabled=false; b.textContent="Save and test"; return;
+  }
+  LS.set("hc_cfg",cfg);
+  log("info","Settings saved","Feed: "+cfg.feed);
+  b.disabled=false; b.textContent="Save and test"; $("settings").classList.add("hidden"); toast("Connected and saved");
+  state="unknown"; checkConn(true); startDevice();
+}
+function wipeSettings(){
+  LS.del("hc_cfg"); cfg={user:"",key:"",feed:"",status:""}; clearInterval(pingT); state="unknown"; stopDevice(); renderDevice();
+  $("settings").classList.add("hidden"); setStatus("bad","Not set up"); toast("Settings removed");
+}
+
+/* ---------- wire up ---------- */
+$("gearBtn").addEventListener("click",()=>{ $("settings").classList.contains("hidden")?openSettings():$("settings").classList.add("hidden") });
+$("closeSet").addEventListener("click",()=>$("settings").classList.add("hidden"));
+$("saveSet").addEventListener("click",saveSettings);
+$("wipeSet").addEventListener("click",wipeSettings);
+$("loginBtn").addEventListener("click",doLogin);
+["pw","pw2"].forEach(i=>$(i).addEventListener("keydown",e=>{ if(e.key==="Enter") doLogin() }));
+$("lockBtn").addEventListener("click",lock);
+$("sendBtn").addEventListener("click",send);
+$("msg").addEventListener("input",e=>{ $("count").textContent=e.target.value.length+" / 200" });
+$("msg").addEventListener("keydown",e=>{ if(e.key==="Enter"&&(e.metaKey||e.ctrlKey)) send() });
+let clrT;
+$("clearBtn").addEventListener("click",()=>{
+  const b=$("clearBtn");
+  if(b.dataset.armed){ clearTimeout(clrT); delete b.dataset.armed; b.textContent="Clear all"; b.classList.remove("danger"); LS.set("hc_hist",[]); renderHist(); toast("Activity cleared"); return }
+  b.dataset.armed="1"; b.textContent="Tap again to clear"; b.classList.add("danger");
+  clrT=setTimeout(()=>{ delete b.dataset.armed; b.textContent="Clear all"; b.classList.remove("danger") },3000);
+});
+["fDay","fHour"].forEach(id=>$(id).addEventListener("input",renderHist));
+$("fReset").addEventListener("click",()=>{ $("fDay").value=""; $("fHour").value=""; renderHist() });
+
+/* stay logged in across reloads until LOCK */
+restore().then(()=>{ cfg=LS.get("hc_cfg",cfg); (LS.get("hc_session",null) && storedHash()) ? showApp() : showLogin(); });
+</script>
+</body>
+</html>
