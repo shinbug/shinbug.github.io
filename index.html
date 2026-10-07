@@ -1,161 +1,46 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Haptic Control</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07090f"><title>Haptic Control</title>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#090d18;color:#f4f7ff;font:15px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-.wrap{max-width:900px;margin:auto;padding:28px 16px}.card{background:#111827;border:1px solid #273449;border-radius:18px;padding:22px;margin:16px 0}
-h1{margin:0 0 5px}h2{margin-top:0}.muted{color:#94a3b8}.hidden{display:none}
-input,textarea,button{font:inherit;border-radius:11px;border:1px solid #34435e;padding:12px;background:#0b1220;color:#fff}
-input,textarea{width:100%}textarea{min-height:110px;resize:vertical}button{background:#2563eb;border-color:#2563eb;font-weight:700;cursor:pointer}
-button.secondary{background:#1e293b}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.error{color:#fca5a5}.ok{color:#86efac}.login{max-width:420px;margin:12vh auto}
-table{width:100%;border-collapse:collapse}td,th{padding:10px;border-bottom:1px solid #263248;text-align:left}th{color:#94a3b8;font-size:12px}
-#setup{border-color:#7c3aed}.small{font-size:13px}
-</style>
-</head>
+:root{--bg:#07090f;--panel:rgba(15,19,30,.78);--line:rgba(255,255,255,.09);--text:#f4f7ff;--muted:#8d97aa;--accent:#7c5cff;--accent2:#21d4fd;--good:#39e58c;--bad:#ff5d73;--shadow:0 24px 70px rgba(0,0,0,.45)}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}body{overflow-x:hidden}body:before,body:after{content:"";position:fixed;pointer-events:none;border-radius:50%;filter:blur(80px);opacity:.22;z-index:-1}body:before{width:360px;height:360px;background:#6d4aff;left:-120px;top:-100px}body:after{width:330px;height:330px;background:#00b8ff;right:-120px;bottom:-90px}
+button,input,textarea{font:inherit}button{border:0;color:inherit;cursor:pointer}.hidden{display:none!important}.wrap{width:min(100% - 18px,900px);margin:0 auto;padding:12px 0 34px}.glass{background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px)}
+.login{min-height:100dvh;display:grid;place-items:center;padding:22px}.login-card{width:min(100%,420px);padding:28px;border-radius:28px;animation:rise .55s cubic-bezier(.2,.8,.2,1)}.logo,.brand{display:flex;align-items:center;gap:12px}.logo{margin-bottom:26px}.logo-mark,.mini-logo{display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent2));font-weight:900;box-shadow:0 0 35px rgba(124,92,255,.35)}.logo-mark{width:46px;height:46px;border-radius:15px}.mini-logo{width:42px;height:42px;border-radius:14px}h1{font-size:25px;margin:0;letter-spacing:-.03em}.sub{color:var(--muted);font-size:12px}.field{display:flex;gap:8px;margin-top:20px}input,textarea{width:100%;background:rgba(255,255,255,.045);border:1px solid var(--line);outline:0;color:var(--text);border-radius:17px;transition:.2s}input{height:54px;padding:0 16px}input:focus,textarea:focus{border-color:rgba(124,92,255,.75);box-shadow:0 0 0 4px rgba(124,92,255,.1)}.primary{height:54px;padding:0 20px;border-radius:17px;background:linear-gradient(135deg,var(--accent),#5e7cff);font-weight:800;box-shadow:0 12px 28px rgba(92,75,220,.3);transition:transform .15s,filter .15s}.primary:active{transform:scale(.97)}.error{color:var(--bad);font-size:13px;margin:10px 3px 0;min-height:18px}
+header{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:18px}.title{font-weight:900;letter-spacing:-.03em}.status{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}.dot{width:8px;height:8px;border-radius:50%;background:var(--muted)}.dot.good{background:var(--good);box-shadow:0 0 15px rgba(57,229,140,.8);animation:pulse 1.8s infinite}.dot.bad{background:var(--bad);box-shadow:0 0 12px rgba(255,93,115,.5)}.lock{height:40px;padding:0 13px;border:1px solid var(--line);border-radius:13px;background:rgba(255,255,255,.045);font-size:12px;font-weight:800}
+.grid{display:grid;gap:14px}.card{border-radius:25px;padding:16px}.card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px}.card-title{font-size:13px;text-transform:uppercase;letter-spacing:.11em;color:#aeb7c8;font-weight:850}textarea{min-height:145px;padding:17px;resize:vertical;line-height:1.5}.sendrow{display:flex;gap:10px;margin-top:10px}.sendrow .primary{flex:1}.counter{display:grid;place-items:center;min-width:54px;height:54px;border:1px solid var(--line);border-radius:17px;color:var(--muted);font-size:12px}.log{display:grid;gap:9px}.event{display:grid;grid-template-columns:9px 1fr auto;gap:10px;align-items:start;padding:12px 11px;border:1px solid rgba(255,255,255,.06);border-radius:16px;background:rgba(255,255,255,.025);animation:fade .35s ease}.event .bar{width:7px;height:7px;border-radius:50%;background:var(--accent);margin-top:5px}.event.good .bar{background:var(--good)}.event.bad .bar{background:var(--bad)}.event-main{font-size:13px}.event-time{font-size:11px;color:var(--muted);white-space:nowrap}.msg{margin-top:5px;color:#aeb7c8;font-size:12px;word-break:break-word}.empty{padding:24px;text-align:center;color:var(--muted);font-size:13px}.toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,20px);opacity:0;padding:12px 16px;border-radius:14px;background:#171c2a;border:1px solid var(--line);box-shadow:var(--shadow);font-size:13px;z-index:20;transition:.25s}.toast.show{opacity:1;transform:translate(-50%,0)}.busy{opacity:.65;pointer-events:none}
+@keyframes rise{from{opacity:0;transform:translateY(18px) scale(.98)}to{opacity:1;transform:none}}@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}@keyframes pulse{50%{opacity:.45;transform:scale(.8)}}
+@media(min-width:700px){.grid{grid-template-columns:1.05fr .95fr}.compose{grid-row:span 2}.card{padding:23px}}@media(max-width:480px){.login-card{padding:22px;border-radius:24px}.field{flex-direction:column}.field .primary{width:100%}.sendrow{position:sticky;bottom:8px}.primary{min-height:54px}.event{grid-template-columns:8px 1fr}.event-time{grid-column:2}.lock{padding:0 11px}}
+</style></head>
 <body>
-<div class="wrap">
-
-<section id="login" class="card login">
-<h1>Haptic Control</h1>
-<p class="muted">Private control panel</p>
-<form id="loginForm">
-<input id="pass" type="password" placeholder="Password" autocomplete="current-password" required>
-<br><br><button>Enter</button>
-</form>
-<p id="loginError" class="error"></p>
-</section>
-
-<section id="app" class="hidden">
-<div class="row" style="justify-content:space-between">
-<div><h1>Haptic Control</h1><div class="muted">Send messages to your device</div></div>
-<button id="logout" class="secondary">Lock</button>
-</div>
-
-<section id="setup" class="card">
-<h2>One-time setup</h2>
-<p class="small muted">These settings are stored only in this browser's local storage. They are NOT uploaded to GitHub.</p>
-<label>Adafruit IO username</label><input id="aioUser" placeholder="your Adafruit username">
-<br><br>
-<label>Adafruit IO key</label><input id="aioKey" type="password" placeholder="your AIO key">
-<br><br>
-<label>Feed key</label><input id="feed" value="haptic">
-<br><br>
-<button id="save">Save settings</button>
-<span id="setupMsg" class="muted"></span>
-</section>
-
-<section class="card">
-<h2>Send a message</h2>
-<form id="send">
-<textarea id="text" maxlength="500" placeholder="Type something for the haptic device..." required></textarea>
-<br><br>
-<div class="row"><button>Send</button><span id="sendMsg" class="muted"></span></div>
-</form>
-</section>
-
-<section class="card">
-<div class="row" style="justify-content:space-between"><h2>Recent messages</h2><button id="refresh" class="secondary">Refresh</button></div>
-<div style="overflow:auto"><table><thead><tr><th>Time</th><th>Message</th><th>Feed entry</th></tr></thead><tbody id="history"></tbody></table></div>
-</section>
-
-<div class="card small">
-<strong>Important:</strong> This GitHub Pages version does not have a real server.
-The page password is only a client-side lock, and the Adafruit IO key stays in
-the browser's local storage. Do not use this version if you need strong access
-control or if you are giving the site to untrusted people.
-</div>
-</section>
-</div>
-
+<section id="login" class="login"><div class="login-card glass"><div class="logo"><div class="logo-mark">H</div><div><h1>Haptic Control</h1><div class="sub">Private control panel</div></div></div><div class="field"><input id="password" type="password" autocomplete="current-password" placeholder="Enter password"><button id="loginBtn" class="primary">Enter</button></div><div id="loginError" class="error"></div></div></section>
+<main id="app" class="wrap hidden"><header><div class="brand"><div class="mini-logo">H</div><div><div class="title">Haptic Control</div><div class="status"><span id="statusDot" class="dot"></span><span id="statusText">Checking connection…</span></div></div></div><button id="lockBtn" class="lock">LOCK</button></header>
+<div class="grid"><section class="card glass compose"><div class="card-head"><div class="card-title">Send message</div><div id="counter" class="sub">0 / 500</div></div><textarea id="message" maxlength="500" placeholder="Type a message…"></textarea><div class="sendrow"><div id="charCount" class="counter">0</div><button id="sendBtn" class="primary">Send message</button></div></section>
+<section class="card glass"><div class="card-head"><div class="card-title">Connection</div><div id="connLabel" class="sub">—</div></div><div class="status"><span id="connDot" class="dot"></span><span id="connDetail">Waiting for first check</span></div></section>
+<section class="card glass"><div class="card-head"><div class="card-title">Activity</div><button id="clearBtn" class="lock">CLEAR</button></div><div id="log" class="log"></div></section></div></main><div id="toast" class="toast"></div>
 <script>
 const PASSWORD_HASH="a2299ab3a09f57f5a4c211d1e8bcd3e1bbce0d648ff7cf573e016f3262832585";
-const $=x=>document.getElementById(x);
-
-async function hash(s){
- const b=new TextEncoder().encode(s);
- const h=await crypto.subtle.digest("SHA-256",b);
- return [...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,"0")).join("");
-}
-
-function settings(){
- return {
-  user:localStorage.getItem("aio_user")||"",
-  key:localStorage.getItem("aio_key")||"",
-  feed:localStorage.getItem("aio_feed")||"haptic"
- };
-}
-
-function showApp(){
- $("login").classList.add("hidden");$("app").classList.remove("hidden");
- const s=settings();$("aioUser").value=s.user;$("aioKey").value=s.key;$("feed").value=s.feed;
- loadHistory();
-}
-
-async function login(){
- const p=$("pass").value;
- if(await hash(p)!==PASSWORD_HASH){$("loginError").textContent="Wrong password.";return}
- sessionStorage.setItem("haptic_unlocked","1");$("pass").value="";showApp();
-}
-
-$("loginForm").onsubmit=e=>{e.preventDefault();login()};
-
-$("logout").onclick=()=>{
- sessionStorage.removeItem("haptic_unlocked");
- $("app").classList.add("hidden");$("login").classList.remove("hidden");
-};
-
-$("save").onclick=()=>{
- localStorage.setItem("aio_user",$("aioUser").value.trim());
- localStorage.setItem("aio_key",$("aioKey").value.trim());
- localStorage.setItem("aio_feed",$("feed").value.trim()||"haptic");
- $("setupMsg").textContent="Saved in this browser.";
-};
-
-async function postMessage(text){
- const s=settings();
- if(!s.user||!s.key||!s.feed)throw Error("Fill in the Adafruit IO settings first.");
- const url=`https://io.adafruit.com/api/v2/${encodeURIComponent(s.user)}/feeds/${encodeURIComponent(s.feed)}/data`;
- const r=await fetch(url,{
-  method:"POST",
-  headers:{"X-AIO-Key":s.key,"Content-Type":"application/json"},
-  body:JSON.stringify({value:text})
- });
- if(!r.ok)throw Error("Adafruit IO rejected the message ("+r.status+"). Check your username/key/feed.");
- return await r.json();
-}
-
-$("send").onsubmit=async e=>{
- e.preventDefault();$("sendMsg").textContent="Sending...";
- try{
-  const d=await postMessage($("text").value.trim());
-  $("text").value="";$("sendMsg").textContent="Sent! Entry #"+(d.id||"?");
-  loadHistory();
- }catch(err){$("sendMsg").textContent=err.message}
-};
-
-async function loadHistory(){
- const s=settings();
- if(!s.user||!s.key||!s.feed){
-  $("history").innerHTML='<tr><td colspan="3" class="muted">Enter your Adafruit IO settings above.</td></tr>';return;
- }
- try{
-  const url=`https://io.adafruit.com/api/v2/${encodeURIComponent(s.user)}/feeds/${encodeURIComponent(s.feed)}/data?limit=50`;
-  const r=await fetch(url,{headers:{"X-AIO-Key":s.key}});
-  if(!r.ok)throw Error();
-  const data=await r.json();
-  $("history").innerHTML=data.map(x=>`<tr><td>${new Date(x.created_at).toLocaleString()}</td><td>${escapeHtml(x.value)}</td><td>${escapeHtml(x.id)}</td></tr>`).join("");
- }catch(e){
-  $("history").innerHTML='<tr><td colspan="3" class="error">Could not load feed history. Check your settings.</td></tr>';
- }
-}
-function escapeHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
-$("refresh").onclick=loadHistory;
-
-if(sessionStorage.getItem("haptic_unlocked")==="1")showApp();
-</script>
-</body>
-</html>
+const DEFAULT_FEED="haptic",SESSION_KEY="haptic_session_v2",LOG_KEY="haptic_activity_v2",CONFIG_KEY="haptic_aio_config_v2",MAX_LOG=100;
+const $=id=>document.getElementById(id);
+async function sha256(s){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+function now(){return new Intl.DateTimeFormat([], {dateStyle:"short",timeStyle:"medium"}).format(new Date())}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
+function getLog(){try{return JSON.parse(localStorage.getItem(LOG_KEY)||"[]")}catch{return[]}}function saveLog(a){localStorage.setItem(LOG_KEY,JSON.stringify(a.slice(-MAX_LOG)))}
+function addEvent(type,text,good=true){const a=getLog();a.push({type,text,time:now(),good});saveLog(a);renderLog()}
+function renderLog(){const a=getLog().slice().reverse();$("log").innerHTML=a.length?a.map(e=>`<div class="event ${e.good?"good":"bad"}"><span class="bar"></span><div><div class="event-main">${esc(e.type)}</div>${e.text?`<div class="msg">${esc(e.text)}</div>`:""}</div><div class="event-time">${esc(e.time)}</div></div>`).join(""):"<div class='empty'>No activity yet.</div>"}
+function toast(s){const t=$("toast");t.textContent=s;t.classList.add("show");clearTimeout(toast.t);toast.t=setTimeout(()=>t.classList.remove("show"),2200)}
+function setStatus(ok,detail){$("statusDot").className="dot "+(ok?"good":"bad");$("statusText").textContent=ok?"ONLINE":"OFFLINE";$("connDot").className="dot "+(ok?"good":"bad");$("connLabel").textContent=ok?"Connected":"Unavailable";$("connDetail").textContent=detail}
+function cfg(){try{const x=JSON.parse(localStorage.getItem(CONFIG_KEY)||"{}");return{x:x.username||"",key:x.key||"",feed:x.feed||DEFAULT_FEED}}catch{return{x:"",key:"",feed:DEFAULT_FEED}}}
+function saveCfg(c){localStorage.setItem(CONFIG_KEY,JSON.stringify(c))}
+async function checkAIO(){const c=cfg();if(!c.x||!c.key){setStatus(false,"Adafruit IO credentials not configured");return false}try{const r=await fetch(`https://io.adafruit.com/api/v2/${encodeURIComponent(c.x)}/feeds/${encodeURIComponent(c.feed)}`,{headers:{"X-AIO-Key":c.key}});if(!r.ok)throw Error("HTTP "+r.status);setStatus(true,"Feed reachable");return true}catch(e){setStatus(false,e.message||"Connection failed");return false}}
+async function sendMessage(){const msg=$("message").value.trim();if(!msg)return toast("Type a message first");let c=cfg();if(!c.x||!c.key){const username=prompt("Adafruit IO username:");if(!username)return;const key=prompt("Adafruit IO key:");if(!key)return;const feed=prompt("Feed key:",DEFAULT_FEED)||DEFAULT_FEED;saveCfg({username,key,feed});c=cfg()}
+$("sendBtn").classList.add("busy");$("sendBtn").textContent="Sending…";try{const r=await fetch(`https://io.adafruit.com/api/v2/${encodeURIComponent(c.x)}/feeds/${encodeURIComponent(c.feed)}/data`,{method:"POST",headers:{"Content-Type":"application/json","X-AIO-Key":c.key},body:JSON.stringify({value:msg})});if(!r.ok){let d="HTTP "+r.status;try{const j=await r.json();d=j.error||j.detail||d}catch{}throw Error(d)}addEvent("Message sent",msg,true);$("message").value="";updateCount();setStatus(true,"Message delivered");toast("Message sent ✓")}catch(e){addEvent("Message failed",e.message||"Unknown error",false);setStatus(false,e.message||"Send failed");toast("Message failed")}finally{$("sendBtn").classList.remove("busy");$("sendBtn").textContent="Send message"}}
+function updateCount(){const n=$("message").value.length;$("charCount").textContent=n;$("counter").textContent=`${n} / 500`}
+function openApp(){$("login").classList.add("hidden");$("app").classList.remove("hidden");renderLog();updateCount();checkAIO()}
+function lock(){localStorage.removeItem(SESSION_KEY);$("app").classList.add("hidden");$("login").classList.remove("hidden");$("password").value="";$("loginError").textContent="";$("password").focus()}
+$("loginBtn").onclick=async()=>{const p=$("password").value;if(!p)return;const h=await sha256(p);if(h===PASSWORD_HASH){localStorage.setItem(SESSION_KEY,"1");openApp()}else{$("loginError").textContent="Wrong password";$("password").select()}};
+$("password").addEventListener("keydown",e=>{if(e.key==="Enter")$("loginBtn").click()});$("lockBtn").onclick=lock;$("sendBtn").onclick=sendMessage;$("message").addEventListener("input",updateCount);$("clearBtn").onclick=()=>{if(confirm("Clear local activity history?")){localStorage.removeItem(LOG_KEY);renderLog();toast("History cleared")}};
+window.addEventListener("online",()=>{if(!$('app').classList.contains('hidden')){addEvent('Browser online','Connection restored',true);checkAIO()}});window.addEventListener("offline",()=>{if(!$('app').classList.contains('hidden')){addEvent('Browser offline','Network connection lost',false);setStatus(false,"Browser is offline")}});
+if(localStorage.getItem(SESSION_KEY)==="1")openApp();else $("password").focus();
+</script></body></html>
