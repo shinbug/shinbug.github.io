@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Haptic Control</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#090d18;color:#f4f7ff;font:15px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.wrap{max-width:900px;margin:auto;padding:28px 16px}.card{background:#111827;border:1px solid #273449;border-radius:18px;padding:22px;margin:16px 0}
+h1{margin:0 0 5px}h2{margin-top:0}.muted{color:#94a3b8}.hidden{display:none}
+input,textarea,button{font:inherit;border-radius:11px;border:1px solid #34435e;padding:12px;background:#0b1220;color:#fff}
+input,textarea{width:100%}textarea{min-height:110px;resize:vertical}button{background:#2563eb;border-color:#2563eb;font-weight:700;cursor:pointer}
+button.secondary{background:#1e293b}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.error{color:#fca5a5}.ok{color:#86efac}.login{max-width:420px;margin:12vh auto}
+table{width:100%;border-collapse:collapse}td,th{padding:10px;border-bottom:1px solid #263248;text-align:left}th{color:#94a3b8;font-size:12px}
+#setup{border-color:#7c3aed}.small{font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<section id="login" class="card login">
+<h1>Haptic Control</h1>
+<p class="muted">Private control panel</p>
+<form id="loginForm">
+<input id="pass" type="password" placeholder="Password" autocomplete="current-password" required>
+<br><br><button>Enter</button>
+</form>
+<p id="loginError" class="error"></p>
+</section>
+
+<section id="app" class="hidden">
+<div class="row" style="justify-content:space-between">
+<div><h1>Haptic Control</h1><div class="muted">Send messages to your device</div></div>
+<button id="logout" class="secondary">Lock</button>
+</div>
+
+<section id="setup" class="card">
+<h2>One-time setup</h2>
+<p class="small muted">These settings are stored only in this browser's local storage. They are NOT uploaded to GitHub.</p>
+<label>Adafruit IO username</label><input id="aioUser" placeholder="your Adafruit username">
+<br><br>
+<label>Adafruit IO key</label><input id="aioKey" type="password" placeholder="your AIO key">
+<br><br>
+<label>Feed key</label><input id="feed" value="haptic">
+<br><br>
+<button id="save">Save settings</button>
+<span id="setupMsg" class="muted"></span>
+</section>
+
+<section class="card">
+<h2>Send a message</h2>
+<form id="send">
+<textarea id="text" maxlength="500" placeholder="Type something for the haptic device..." required></textarea>
+<br><br>
+<div class="row"><button>Send</button><span id="sendMsg" class="muted"></span></div>
+</form>
+</section>
+
+<section class="card">
+<div class="row" style="justify-content:space-between"><h2>Recent messages</h2><button id="refresh" class="secondary">Refresh</button></div>
+<div style="overflow:auto"><table><thead><tr><th>Time</th><th>Message</th><th>Feed entry</th></tr></thead><tbody id="history"></tbody></table></div>
+</section>
+
+<div class="card small">
+<strong>Important:</strong> This GitHub Pages version does not have a real server.
+The page password is only a client-side lock, and the Adafruit IO key stays in
+the browser's local storage. Do not use this version if you need strong access
+control or if you are giving the site to untrusted people.
+</div>
+</section>
+</div>
+
+<script>
+const PASSWORD_HASH="CHANGE_ME";
+const $=x=>document.getElementById(x);
+
+async function hash(s){
+ const b=new TextEncoder().encode(s);
+ const h=await crypto.subtle.digest("SHA-256",b);
+ return [...new Uint8Array(h)].map(x=>x.toString(16).padStart(2,"0")).join("");
+}
+
+function settings(){
+ return {
+  user:localStorage.getItem("aio_user")||"",
+  key:localStorage.getItem("aio_key")||"",
+  feed:localStorage.getItem("aio_feed")||"haptic"
+ };
+}
+
+function showApp(){
+ $("login").classList.add("hidden");$("app").classList.remove("hidden");
+ const s=settings();$("aioUser").value=s.user;$("aioKey").value=s.key;$("feed").value=s.feed;
+ loadHistory();
+}
+
+async function login(){
+ const p=$("pass").value;
+ if(await hash(p)!==PASSWORD_HASH){$("loginError").textContent="Wrong password.";return}
+ sessionStorage.setItem("haptic_unlocked","1");$("pass").value="";showApp();
+}
+
+$("loginForm").onsubmit=e=>{e.preventDefault();login()};
+
+$("logout").onclick=()=>{
+ sessionStorage.removeItem("haptic_unlocked");
+ $("app").classList.add("hidden");$("login").classList.remove("hidden");
+};
+
+$("save").onclick=()=>{
+ localStorage.setItem("aio_user",$("aioUser").value.trim());
+ localStorage.setItem("aio_key",$("aioKey").value.trim());
+ localStorage.setItem("aio_feed",$("feed").value.trim()||"haptic");
+ $("setupMsg").textContent="Saved in this browser.";
+};
+
+async function postMessage(text){
+ const s=settings();
+ if(!s.user||!s.key||!s.feed)throw Error("Fill in the Adafruit IO settings first.");
+ const url=`https://io.adafruit.com/api/v2/${encodeURIComponent(s.user)}/feeds/${encodeURIComponent(s.feed)}/data`;
+ const r=await fetch(url,{
+  method:"POST",
+  headers:{"X-AIO-Key":s.key,"Content-Type":"application/json"},
+  body:JSON.stringify({value:text})
+ });
+ if(!r.ok)throw Error("Adafruit IO rejected the message ("+r.status+"). Check your username/key/feed.");
+ return await r.json();
+}
+
+$("send").onsubmit=async e=>{
+ e.preventDefault();$("sendMsg").textContent="Sending...";
+ try{
+  const d=await postMessage($("text").value.trim());
+  $("text").value="";$("sendMsg").textContent="Sent! Entry #"+(d.id||"?");
+  loadHistory();
+ }catch(err){$("sendMsg").textContent=err.message}
+};
+
+async function loadHistory(){
+ const s=settings();
+ if(!s.user||!s.key||!s.feed){
+  $("history").innerHTML='<tr><td colspan="3" class="muted">Enter your Adafruit IO settings above.</td></tr>';return;
+ }
+ try{
+  const url=`https://io.adafruit.com/api/v2/${encodeURIComponent(s.user)}/feeds/${encodeURIComponent(s.feed)}/data?limit=50`;
+  const r=await fetch(url,{headers:{"X-AIO-Key":s.key}});
+  if(!r.ok)throw Error();
+  const data=await r.json();
+  $("history").innerHTML=data.map(x=>`<tr><td>${new Date(x.created_at).toLocaleString()}</td><td>${escapeHtml(x.value)}</td><td>${escapeHtml(x.id)}</td></tr>`).join("");
+ }catch(e){
+  $("history").innerHTML='<tr><td colspan="3" class="error">Could not load feed history. Check your settings.</td></tr>';
+ }
+}
+function escapeHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
+$("refresh").onclick=loadHistory;
+
+if(sessionStorage.getItem("haptic_unlocked")==="1")showApp();
+</script>
+</body>
+</html>
