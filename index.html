@@ -471,40 +471,123 @@ function startDevice(){
 function stopDevice(){ mqttStop(); clearInterval(tickT); devOnline=devWas=null }
 
 /* ---------- battery + estimated hours left ---------- */
-let batt=LS.get("hc_batt",{p:null,v:null,ts:0,s:[],chg:false});
-function battUpdate(p,v){
-  const now=Date.now(), prev=batt.s[batt.s.length-1];
-  if(prev){
-    if(p>prev[1]+2){ batt.s=[]; batt.chg=true }                       // clear rise = charging, old drain trend is void
-    else if(p<prev[1]){ if(batt.chg) batt.s=[]; batt.chg=false }       // unplugged: start a fresh drain trend
+
+let batt = LS.get("hc_batt", {
+  p: null, v: null, ts: 0, s: [], chg: false
+});
+
+// Reset the old, unreliable charging inference once.
+if (!LS.get("hc_batt_v2_reset", false)) {
+  batt.s = [];
+  batt.chg = false;
+  LS.set("hc_batt", batt);
+  LS.set("hc_batt_v2_reset", true);
+}
+
+function battUpdate(p, v) {
+  const now = Date.now();
+  const prev = batt.s[batt.s.length - 1];
+
+  // Do not infer charging from percentage fluctuations.
+  batt.chg = false;
+  batt.p = p;
+  batt.v = v;
+  batt.ts = now;
+
+  // Record at most one sample every 5 minutes.
+  if (!prev || now - prev[0] >= 300000) {
+    batt.s.push([now, p]);
   }
-  batt.p=p; batt.v=v; batt.ts=now;
-  const last=batt.s[batt.s.length-1];
-  if(!last||now-last[0]>=300000) batt.s.push([now,p]);                                        // one sample per 5 min
-  batt.s=batt.s.filter(x=>now-x[0]<8*3600e3).slice(-200);
-  LS.set("hc_batt",batt);
+
+  // Keep up to 8 hours of history.
+  batt.s = batt.s.filter(
+    x => x[0] > now - 8 * 3600e3
+  ).slice(-200);
+
+  LS.set("hc_batt", batt);
 }
-function battEta(){            // linear fit of % vs time, then % left / drain rate
-  const s=batt.s, n=s.length; if(n<3||batt.chg) return null;
-  const t0=s[0][0], xs=s.map(a=>(a[0]-t0)/3600e3), ys=s.map(a=>a[1]);
-  if(xs[n-1]<0.5||ys[0]-ys[n-1]<2) return null;           // need ≥30 min and ≥2% drop or it's noise
-  const sx=xs.reduce((a,b)=>a+b),sy=ys.reduce((a,b)=>a+b),sxy=xs.reduce((a,x,i)=>a+x*ys[i],0),sxx=xs.reduce((a,x)=>a+x*x,0);
-  const slope=(n*sxy-sx*sy)/(n*sxx-sx*sx);
-  return slope<-0.05?ys[n-1]/-slope:null;
+
+function battEta() {
+  const s = batt.s;
+  const n = s.length;
+
+  if (n < 3) return null;
+
+  const t0 = s[0][0];
+  const xs = s.map(a => (a[0] - t0) / 3600000);
+  const ys = s.map(a => a[1]);
+
+  // Require at least 30 minutes and a meaningful
+  // percentage drop before estimating remaining time.
+  if (xs[n - 1] < 0.5 || ys[0] - ys[n - 1] < 2) {
+    return null;
+  }
+
+  const sx = xs.reduce((a, b) => a + b, 0);
+  const sy = ys.reduce((a, b) => a + b, 0);
+  const sxy = xs.reduce((a, x, i) => a + x * ys[i], 0);
+  const sxx = xs.reduce((a, x) => a + x * x, 0);
+  const denom = n * sxx - sx * sx;
+
+  if (denom <= 0) return null;
+
+  const slope = (n * sxy - sx * sy) / denom;
+
+  // No reliable discharge trend yet.
+  if (slope >= -0.05) return null;
+
+  return Math.max(0, ys[n - 1]) / -slope;
 }
-function renderBatt(){
-  const card=$("batt"); if(!card) return;
-  if(batt.p==null){ $("bPct").textContent="–"; $("bVolt").textContent=cfg.status?"Waiting for device":"Set up status feed"; $("bEta").textContent="–"; $("bFill").style.width="0"; $("bSeen").textContent=""; return }
-  const p=batt.p, f=$("bFill");
-  f.style.width=Math.max(4,p)+"%"; f.style.background=p<=15?"var(--bad)":p<=30?"var(--warn)":"var(--ok)";
-  $("bPct").textContent=p+"%";
-  $("bVolt").textContent=(batt.v!=null?batt.v.toFixed(2)+" V":"")+(batt.chg?" · charging":"");
-  const eta=battEta();
-  $("bEta").textContent=batt.chg?(p>=100?"Full":"Charging"):eta==null?(p>=100?"Full":"Learning…"):"~"+(eta<1?Math.round(eta*60)+" min":(eta<10?eta.toFixed(1):Math.round(eta))+" h");
-  const live=devOnline===true;
-  card.classList.toggle("stale",!live);
-  $("bSeen").textContent=live?"Live":"Last reported "+ago(Date.now()-batt.ts);
+
+function renderBatt() {
+  const card = $("batt");
+  if (!card) return;
+
+  if (batt.p == null) {
+    $("bPct").textContent = "–";
+    $("bVolt").textContent =
+      cfg.status ? "Waiting for device" : "Set up status feed";
+    $("bEta").textContent = "–";
+    $("bFill").style.width = "0";
+    $("bSeen").textContent = "";
+    return;
+  }
+
+  const p = batt.p;
+  const f = $("bFill");
+
+  f.style.width = Math.max(0, Math.min(100, p)) + "%";
+  f.style.background =
+    p <= 15 ? "var(--bad)" :
+    p <= 30 ? "var(--warn)" : "var(--ok)";
+
+  $("bPct").textContent = p + "%";
+
+  // Show measured voltage without falsely claiming charging.
+  $("bVolt").textContent =
+    (batt.v != null ? batt.v.toFixed(2) + " V" : "") +
+    " · battery status unverified";
+
+  const eta = battEta();
+
+  if (p >= 100) {
+    $("bEta").textContent = "Full";
+  } else if (eta == null) {
+    $("bEta").textContent = "Learning…";
+  } else if (eta < 1) {
+    $("bEta").textContent = "~" + Math.round(eta * 60) + " min";
+  } else {
+    $("bEta").textContent =
+      "~" + (eta < 10 ? eta.toFixed(1) : Math.round(eta)) + " h";
+  }
+
+  const live = devOnline === true;
+  card.classList.toggle("stale", !live);
+  $("bSeen").textContent = live
+    ? "Live"
+    : "Last reported " + ago(Date.now() - batt.ts);
 }
+
 
 /* ---------- send ---------- */
 let sending=false;
