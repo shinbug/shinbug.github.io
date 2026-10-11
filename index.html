@@ -355,7 +355,7 @@ const enc=new TextEncoder(), dec=new TextDecoder();
 const mStr=s=>{ const b=enc.encode(s); return [b.length>>8,b.length&255,...b] };
 function mPkt(type,body){ const h=[type]; let n=body.length; do{ let d=n%128; n=Math.floor(n/128); h.push(n?d|128:d) }while(n); return new Uint8Array([...h,...body]) }
 const MQTT_PATHS=["/mqtt","/mqtt/","/"];   // tried in order until one connects
-const STALE_MS=90000;                      // device publishes every 30 s; mark offline after 90 s without a fresh heartbeat
+const STALE_MS=50000;                      // device publishes every 30 s; mark offline after 90 s without a fresh heartbeat
 let ws=null, mqttUp=false, everUp=false, mqttDead=true, mqttBuf=new Uint8Array(0), mqttRetry, mqttPing, pathIdx=0, retryN=0, lastRx=0, tickT;
 let lastJunk="", feedNote="", notice="", polling=false, pollT, devOnline=null, devWas=null, hbTs=LS.get("hc_lastseen",0);
 const topic=()=>`${cfg.user}/feeds/${cfg.status}`;
