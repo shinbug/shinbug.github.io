@@ -355,7 +355,7 @@ const enc=new TextEncoder(), dec=new TextDecoder();
 const mStr=s=>{ const b=enc.encode(s); return [b.length>>8,b.length&255,...b] };
 function mPkt(type,body){ const h=[type]; let n=body.length; do{ let d=n%128; n=Math.floor(n/128); h.push(n?d|128:d) }while(n); return new Uint8Array([...h,...body]) }
 const MQTT_PATHS=["/mqtt","/mqtt/","/"];   // tried in order until one connects
-const STALE_MS=60000;                      // device publishes every 15 s; an "online" older than this means it stopped
+const STALE_MS=90000;                      // device publishes every 30 s; mark offline after 90 s without a fresh heartbeat
 let ws=null, mqttUp=false, everUp=false, mqttDead=true, mqttBuf=new Uint8Array(0), mqttRetry, mqttPing, pathIdx=0, retryN=0, lastRx=0, tickT;
 let lastJunk="", feedNote="", notice="", polling=false, pollT, devOnline=null, devWas=null, hbTs=LS.get("hc_lastseen",0);
 const topic=()=>`${cfg.user}/feeds/${cfg.status}`;
@@ -384,7 +384,7 @@ function mqttOpen(){
     clearInterval(mqttPing); mqttUp=false; mqttBuf=new Uint8Array(0);
     if(mqttDead){ renderDevice(); return }
     if(!opened&&!everUp&&pathIdx<MQTT_PATHS.length-1){ pathIdx++; mqttOpen(); return }   // next path right away
-    if(!everUp) startPoll();                                                              // live link never worked: fall back to HTTP checks
+    startPoll();                                                                          // HTTP fallback while the live link reconnects
     const delay=Math.min((everUp?4000:20000)*2**Math.min(retryN,3),90000); retryN++;      // back off: Adafruit bans >20 logins/min
     mqttRetry=setTimeout(()=>{ if(!everUp) pathIdx=0; mqttOpen() },delay);
     renderDevice();
@@ -404,7 +404,12 @@ function mqttPacket(t,b){
     const tl=(b[0]<<8)|b[1], tp=dec.decode(b.slice(2,2+tl)); let o=2+tl; if((t>>1)&3) o+=2;
     const pl=dec.decode(b.slice(o));
     if(tp.endsWith("/errors")||tp.endsWith("/throttle")){ notice=pl.slice(0,120); log("bad","Adafruit IO notice",pl.slice(0,160)); toast("Adafruit IO: "+pl.slice(0,60)); renderDevice(); return }
-    stopPoll(); onStatus(pl);
+    if(tp===topic()){
+      // MQTT gives us the payload but not the feed timestamp. Ask Adafruit IO
+      // for the latest value so the 90-second stale-heartbeat check is accurate.
+      stopPoll();
+      pollStatus(true);
+    }
   }
 }
 function mqttStart(){ mqttStop(); if(!cfg.user||!cfg.key||!cfg.status) return; mqttDead=false; pathIdx=0; retryN=0; everUp=false; mqttOpen() }
@@ -425,7 +430,11 @@ async function pollStatus(force){
     if(!r.ok||(!polling&&!force)) return;
     feedNote="";
     const d=await r.json();
-    if(d&&d.value!=null){ onStatus(String(d.value), d.created_at?Date.parse(d.created_at):0); if(force&&!polling&&devOnline!==null) startPoll() }
+    if(d&&d.value!=null){
+      onStatus(String(d.value), d.created_at?Date.parse(d.created_at):0);
+      // Poll only when the live MQTT/WebSocket connection is unavailable.
+      if(force&&!polling&&!mqttUp) startPoll();
+    }
   }catch(e){}
 }
 
@@ -436,7 +445,7 @@ function onStatus(txt,ts){
   if(sv!=="online"&&sv!=="offline"){ lastJunk=String(txt).slice(0,40); renderDevice(); return }   // old heartbeat values etc: ignore, never guess "offline"
   lastJunk=""; feedNote="";
   if(sv==="online"){ hbTs=ts||Date.now(); LS.set("hc_lastseen",hbTs) }
-  const on=sv==="online"&&!(ts&&Date.now()-ts>STALE_MS);   // (HTTP fallback only) a stale "online" means the device stopped
+  const on=sv==="online"&&!(ts&&Date.now()-ts>STALE_MS);   // a stale "online" feed value means the device stopped reporting
   if(devWas!==null&&on!==devWas){
     if(on){ log("ok","Device online","Powered on"); toast("Device is online"); const el=$("dev"); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash") }
     else { log("bad","Device offline","Connection lost"); toast("Device went offline") }
@@ -465,128 +474,55 @@ function renderDevice(){
 }
 function startDevice(){
   stopDevice(); renderDevice(); renderBatt();
-  tickT=setInterval(()=>{ renderDevice(); renderBatt(); if(mqttUp&&Date.now()-lastRx>75000) mqttWake() },1000);
+  tickT=setInterval(()=>{
+    // MQTT can remain connected even after the device stops sending heartbeats.
+    if(devOnline===true && hbTs && Date.now()-hbTs>STALE_MS){
+      devWas=devOnline=false;
+      log("bad","Device offline","No fresh heartbeat for over 90 seconds");
+      toast("Device went offline");
+    }
+    renderDevice(); renderBatt();
+    if(mqttUp&&Date.now()-lastRx>75000) mqttWake();
+  },1000);
   mqttStart();
 }
 function stopDevice(){ mqttStop(); clearInterval(tickT); devOnline=devWas=null }
 
 /* ---------- battery + estimated hours left ---------- */
-
-let batt = LS.get("hc_batt", {
-  p: null, v: null, ts: 0, s: [], chg: false
-});
-
-// Reset the old, unreliable charging inference once.
-if (!LS.get("hc_batt_v2_reset", false)) {
-  batt.s = [];
-  batt.chg = false;
-  LS.set("hc_batt", batt);
-  LS.set("hc_batt_v2_reset", true);
-}
-
-function battUpdate(p, v) {
-  const now = Date.now();
-  const prev = batt.s[batt.s.length - 1];
-
-  // Do not infer charging from percentage fluctuations.
-  batt.chg = false;
-  batt.p = p;
-  batt.v = v;
-  batt.ts = now;
-
-  // Record at most one sample every 5 minutes.
-  if (!prev || now - prev[0] >= 300000) {
-    batt.s.push([now, p]);
+let batt=LS.get("hc_batt",{p:null,v:null,ts:0,s:[],chg:false});
+function battUpdate(p,v){
+  const now=Date.now(), prev=batt.s[batt.s.length-1];
+  if(prev){
+    if(p>prev[1]+2){ batt.s=[]; batt.chg=true }                       // clear rise = charging, old drain trend is void
+    else if(p<prev[1]){ if(batt.chg) batt.s=[]; batt.chg=false }       // unplugged: start a fresh drain trend
   }
-
-  // Keep up to 8 hours of history.
-  batt.s = batt.s.filter(
-    x => x[0] > now - 8 * 3600e3
-  ).slice(-200);
-
-  LS.set("hc_batt", batt);
+  batt.p=p; batt.v=v; batt.ts=now;
+  const last=batt.s[batt.s.length-1];
+  if(!last||now-last[0]>=300000) batt.s.push([now,p]);                                        // one sample per 5 min
+  batt.s=batt.s.filter(x=>now-x[0]<8*3600e3).slice(-200);
+  LS.set("hc_batt",batt);
 }
-
-function battEta() {
-  const s = batt.s;
-  const n = s.length;
-
-  if (n < 3) return null;
-
-  const t0 = s[0][0];
-  const xs = s.map(a => (a[0] - t0) / 3600000);
-  const ys = s.map(a => a[1]);
-
-  // Require at least 30 minutes and a meaningful
-  // percentage drop before estimating remaining time.
-  if (xs[n - 1] < 0.5 || ys[0] - ys[n - 1] < 2) {
-    return null;
-  }
-
-  const sx = xs.reduce((a, b) => a + b, 0);
-  const sy = ys.reduce((a, b) => a + b, 0);
-  const sxy = xs.reduce((a, x, i) => a + x * ys[i], 0);
-  const sxx = xs.reduce((a, x) => a + x * x, 0);
-  const denom = n * sxx - sx * sx;
-
-  if (denom <= 0) return null;
-
-  const slope = (n * sxy - sx * sy) / denom;
-
-  // No reliable discharge trend yet.
-  if (slope >= -0.05) return null;
-
-  return Math.max(0, ys[n - 1]) / -slope;
+function battEta(){            // linear fit of % vs time, then % left / drain rate
+  const s=batt.s, n=s.length; if(n<3||batt.chg) return null;
+  const t0=s[0][0], xs=s.map(a=>(a[0]-t0)/3600e3), ys=s.map(a=>a[1]);
+  if(xs[n-1]<0.5||ys[0]-ys[n-1]<2) return null;           // need ≥30 min and ≥2% drop or it's noise
+  const sx=xs.reduce((a,b)=>a+b),sy=ys.reduce((a,b)=>a+b),sxy=xs.reduce((a,x,i)=>a+x*ys[i],0),sxx=xs.reduce((a,x)=>a+x*x,0);
+  const slope=(n*sxy-sx*sy)/(n*sxx-sx*sx);
+  return slope<-0.05?ys[n-1]/-slope:null;
 }
-
-function renderBatt() {
-  const card = $("batt");
-  if (!card) return;
-
-  if (batt.p == null) {
-    $("bPct").textContent = "–";
-    $("bVolt").textContent =
-      cfg.status ? "Waiting for device" : "Set up status feed";
-    $("bEta").textContent = "–";
-    $("bFill").style.width = "0";
-    $("bSeen").textContent = "";
-    return;
-  }
-
-  const p = batt.p;
-  const f = $("bFill");
-
-  f.style.width = Math.max(0, Math.min(100, p)) + "%";
-  f.style.background =
-    p <= 15 ? "var(--bad)" :
-    p <= 30 ? "var(--warn)" : "var(--ok)";
-
-  $("bPct").textContent = p + "%";
-
-  // Show measured voltage without falsely claiming charging.
-  $("bVolt").textContent =
-    (batt.v != null ? batt.v.toFixed(2) + " V" : "");
-
-  const eta = battEta();
-
-  if (p >= 100) {
-    $("bEta").textContent = "Full";
-  } else if (eta == null) {
-    $("bEta").textContent = "Estimating";
-  } else if (eta < 1) {
-    $("bEta").textContent = "~" + Math.round(eta * 60) + " min";
-  } else {
-    $("bEta").textContent =
-      "~" + (eta < 10 ? eta.toFixed(1) : Math.round(eta)) + " h";
-  }
-
-  const live = devOnline === true;
-  card.classList.toggle("stale", !live);
-  $("bSeen").textContent = live
-    ? "Live"
-    : "Last reported " + ago(Date.now() - batt.ts);
+function renderBatt(){
+  const card=$("batt"); if(!card) return;
+  if(batt.p==null){ $("bPct").textContent="–"; $("bVolt").textContent=cfg.status?"Waiting for device":"Set up status feed"; $("bEta").textContent="–"; $("bFill").style.width="0"; $("bSeen").textContent=""; return }
+  const p=batt.p, f=$("bFill");
+  f.style.width=Math.max(4,p)+"%"; f.style.background=p<=15?"var(--bad)":p<=30?"var(--warn)":"var(--ok)";
+  $("bPct").textContent=p+"%";
+  $("bVolt").textContent=(batt.v!=null?batt.v.toFixed(2)+" V":"")+(batt.chg?" · charging":"");
+  const eta=battEta();
+  $("bEta").textContent=batt.chg?(p>=100?"Full":"Charging"):eta==null?(p>=100?"Full":"Learning…"):"~"+(eta<1?Math.round(eta*60)+" min":(eta<10?eta.toFixed(1):Math.round(eta))+" h");
+  const live=devOnline===true;
+  card.classList.toggle("stale",!live);
+  $("bSeen").textContent=live?"Live":"Last reported "+ago(Date.now()-batt.ts);
 }
-
 
 /* ---------- send ---------- */
 let sending=false;
