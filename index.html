@@ -186,7 +186,15 @@ textarea{resize:none;min-height:120px;line-height:1.5}
     </div>
 
     <div class="card" style="animation:rise .6s .24s both">
-      <div class="top" style="margin:0"><h2>Activity</h2><button class="link" id="clearBtn">Clear all</button></div>
+      
+      <div class="top" style="margin:0">
+        <h2>Activity</h2>
+        <div style="display:flex;align-items:center;gap:4px">
+          <button class="link" id="downloadBtn">Download CSV</button>
+          <button class="link" id="clearBtn">Clear all</button>
+        </div>
+      </div>
+  
       <div class="filters">
         <input type="date" id="fDay" aria-label="Day">
         <select id="fHour" aria-label="Hour"><option value="">Any hour</option></select>
@@ -589,15 +597,103 @@ $("lockBtn").addEventListener("click",lock);
 $("sendBtn").addEventListener("click",send);
 $("msg").addEventListener("input",e=>{ $("count").textContent=e.target.value.length+" / 200" });
 $("msg").addEventListener("keydown",e=>{ if(e.key==="Enter"&&(e.metaKey||e.ctrlKey)) send() });
+
 let clrT;
-$("clearBtn").addEventListener("click",()=>{
-  const b=$("clearBtn");
-  if(b.dataset.armed){ clearTimeout(clrT); delete b.dataset.armed; b.textContent="Clear all"; b.classList.remove("danger"); LS.set("hc_hist",[]); renderHist(); toast("Activity cleared"); return }
-  b.dataset.armed="1"; b.textContent="Tap again to clear"; b.classList.add("danger");
-  sentCount = 0;
-  failedCount = 0;
-  clrT=setTimeout(()=>{ delete b.dataset.armed; b.textContent="Clear all"; b.classList.remove("danger") },3000);
+$("clearBtn").addEventListener("click", () => {
+  const b = $("clearBtn");
+
+  if (b.dataset.armed) {
+    clearTimeout(clrT);
+    delete b.dataset.armed;
+    b.textContent = "Clear all";
+    b.classList.remove("danger");
+
+    //clr activty history
+    LS.set("hc_hist", []);
+
+    // reset failed and sent
+    LS.set("hc_stats", {
+      sent: 0,
+      fail: 0,
+      last: 0
+    });
+
+    // refresh ui
+    renderHist();
+    renderStats();
+    toast("Activity and counters cleared");
+    return;
+  }
+
+  b.dataset.armed = "1";
+  b.textContent = "Tap again to clear";
+  b.classList.add("danger");
+
+  clrT = setTimeout(() => {
+    delete b.dataset.armed;
+    b.textContent = "Clear all";
+    b.classList.remove("danger");
+  }, 3000);
+  
 });
+
+$("downloadBtn").addEventListener("click", () => {
+  const history = LS.get("hc_hist", []);
+
+  if (!history.length) {
+    toast("No history to download");
+    return;
+  }
+
+  const escapeCSV = value => {
+    const text = value == null ? "" :
+      typeof value === "object" ? JSON.stringify(value) :
+      String(value);
+
+    return '"' + text.replace(/"/g, '""') + '"';
+  };
+
+  const rows = [
+    ["Timestamp", "Date", "Time", "Type", "Event", "Details"],
+    ...history.map(entry => {
+      const date = new Date(entry.ts);
+
+      return [
+        date.toISOString(),
+        date.toLocaleDateString(),
+        date.toLocaleTimeString(),
+        entry.kind || "",
+        entry.title || "",
+        entry.detail || ""
+      ];
+    })
+  ];
+
+  const csv = "\uFEFF" + rows
+    .map(row => row.map(escapeCSV).join(","))
+    .join("\r\n");
+
+  const blob = new Blob([csv], {
+    type: "text/csv;charset=utf-8;"
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download =
+    "haptic-control-history-" +
+    new Date().toISOString().slice(0, 10) +
+    ".csv";
+
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  toast("History downloaded");
+});
+
 ["fDay","fHour"].forEach(id=>$(id).addEventListener("input",renderHist));
 $("fReset").addEventListener("click",()=>{ $("fDay").value=""; $("fHour").value=""; renderHist() });
 
