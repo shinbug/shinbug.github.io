@@ -565,15 +565,14 @@ function renderBatt() {
 
   // Show measured voltage without falsely claiming charging.
   $("bVolt").textContent =
-    (batt.v != null ? batt.v.toFixed(2) + " V" : "") +
-    " · battery status unverified";
+    (batt.v != null ? batt.v.toFixed(2) + " V" : "");
 
   const eta = battEta();
 
   if (p >= 100) {
     $("bEta").textContent = "Full";
   } else if (eta == null) {
-    $("bEta").textContent = "Learning…";
+    $("bEta").textContent = "Estimating";
   } else if (eta < 1) {
     $("bEta").textContent = "~" + Math.round(eta * 60) + " min";
   } else {
