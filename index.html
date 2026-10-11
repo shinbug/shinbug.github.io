@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Haptic">
-<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAACvUlEQVR42u3d0XLaMBBA0aDhW5Nv4mvJS4ZJCCE2SEK7e+5TO50BYh2vbErp4fz+Jt2sOQSCQ3AIDsEhOASH4BAcgkNwSHAIDsEhOASH4BAcgkNwCA4JDsEhOASH4BAcgkNwCA7BIcEhOASH4BAcgkNwCA7BITgEhwSH4BAcgkNwaK2OOX+s0/nrFx8Ha/xwh2z/Gc+FxfcQsa0Ijj0zY+OfKv/k+EsAGaVxbFl+RFxzCA7B0WtPkcmBERyCwzCAAyY4BIcxAIfgyDg2zBuTQ3AIjr5bg51lQ0eHYAjZFB9MzLutTF6e0/nHNLr6LRwL7SmLnLjBfRS+IO21cnk/u5oax7T5kfTytiU842fuKak/u1r7fQ43tHBQWAPH3j1l6Baza8kD+mjOaXMNDhBz43jsPmXQzlJg5Jgchgcc6yxYHB8tzxKu9t6XbSVGq/0FehBbQXCMHhtuaF1zzBtU/2KNwLEVWrDJm0J8H2M+Jnj1Y4+e+WW/LLDvcf7VgK+anH9CbDwovZDdf5yrB5l8NLr6aOFluNEY9vJa+AO3/Vx5ye4z/0n7rYK7lfG4w14SweHSOCuOvYvxqsWLicbk0Bwck8+PEU93Z+N4ck+ZdnD6PVELsGA3nyXioJ7wspd+n2OCjycf/+Wqxr2AAO+QprzpKPkWvgtSwZH9LIcjzjYER10NJofgKNn2jaDwR41MDjsLHIKj885S++OrJofgcNkBx6h7lnp7iskhOARHpC0JDmsMh+BQsXkDh50FDsEhOGxDcFhvOASHGQOHVYdDcKjudIFDcBgMcKADBwFwQPPSSn6zz5Yu/y6h8CyBQ7YVwSE4BIfgEByCQ3AIDsEhwSE4BIfgEByCQ3AIDsEhOCQ4BIfgEByCQ3AIDsEhOASHBIfgEByCQ3AIDsEhOASH4BAcEhyCQ3AIDsGhxfoEPgugjwcdcjcAAAAASUVORK5CYII=">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAACvUlEQVR42u3d0XLaMBBA0aDhW5Nv4mvJS4ZJCCE2SEK7e+5TO50BYh2vbErp4fz+Jt2sOQSCQ3AIDsEhOASH4BAcgkNwSHAIDsEhOASH4BAcgkNwCA4JDsEhOASH4BAcgkNwCA7BIcEhOASH4BAcgkNwCA7BITgEhwSH4BAcgkNwaK2OOX+s0/nrFx8Ha/xwh2z/Gc+FxfcQsa0Ijj0zY+OfKv/k+EsAGaVxbFl+RFxzCA7B0WtPkcmBERyCwzCAAyY4BIcxAIfgyDg2zBuTQ3AIjr5bg51lQ0eHYAjZFB9MzLutTF6e0/nHNLr6LRwL7SmLnLjBfRS+IO21cnk/u5oax7T5kfTytiU842fuKak/u1r7fQ43tHBQWAPH3j1l6Baza8kD+mjOaXMNDhBz43jsPmXQzlJg5Jgchgcc6yxYHB8tzxKu9t6XbSVGq/0FehBbQXCMHhtuaF1zzBtU/2KNwLEVWrDJm0J8H2M+Jnj1Y4+e+WW/LLDvcf7VgK+anH9CbDwovZDdf5yrB5l8NLr6aOFluNEY9vJa+AO3/Vx5ye4z/0n7rYK7lfG4w14SweHSOCuOvYvxqsWLicbk0Bwck8+PEU93Z+N4ck+ZdnD6PVELsGA3nyXioJ7wspd+n2OCjycf/+Wqxr2AAO+QprzpKPkWvgtSwZH9LIcjzjYER10NJofgKNn2jaDwR41MDjsLHIKj885S++OrJofgcNkBx6h7lnp7iskhOARHpC0JDmsMh+BQsXkDh50FDsEhOGxDcFhvOASHGQOHVYdDcKjudIFDcBgMcKADBwFwQPPSSn6zz5Yu/y6h8CyBQ7YVwSE4BIfgEByCQ3AIDsEhOCQ4BIfgEByCQ3AIDsEhOASHBIfgEByCQ3AIDsEhOASH4BAcEhyCQ3AIDsGhxfoEPgugjwcdcjcAAAAASUVORK5CYII=">
 <title>Haptic Control</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -74,6 +74,16 @@ textarea{resize:none;min-height:120px;line-height:1.5}
 .devsub{font-size:13.5px;color:var(--dim);margin-top:2px}
 .dev.flash{animation:flash 1.2s ease-out}
 @keyframes flash{0%{background:#e3eddf}100%{background:var(--card)}}
+
+.brow{display:flex;align-items:center;gap:14px}
+.bicon{position:relative;width:48px;height:24px;border:2px solid var(--ink);border-radius:6px;flex:none}
+.bicon::after{content:"";position:absolute;right:-6px;top:6px;width:3px;height:8px;background:var(--ink);border-radius:0 2px 2px 0}
+.bicon i{position:absolute;left:2px;top:2px;bottom:2px;width:0;border-radius:2px;background:var(--ok);transition:width .4s,background .3s}
+.bpct{font:400 24px var(--serif);line-height:1.1}
+.beta{margin-left:auto;text-align:right}
+.beta b{display:block;font:400 20px var(--serif)}
+.beta span{font-size:12.5px;color:var(--dim)}
+#batt.stale .bicon,#batt.stale .bpct{opacity:.5}
 
 .filters{display:flex;gap:8px;margin-top:12px;align-items:center}
 .filters input,.filters select{flex:1;min-width:0;width:auto;min-height:42px;padding:9px 12px;font-size:14px;-webkit-appearance:none;appearance:none}
@@ -142,8 +152,8 @@ textarea{resize:none;min-height:120px;line-height:1.5}
       <input id="cUser" placeholder="Adafruit IO username" autocapitalize="off" autocomplete="off" spellcheck="false">
       <input id="cKey" type="password" placeholder="Adafruit IO key" autocapitalize="off" autocomplete="off" spellcheck="false" style="margin-top:10px">
       <input id="cFeed" placeholder="Message feed key (e.g. messages)" autocapitalize="off" autocomplete="off" spellcheck="false" style="margin-top:10px">
-      <input id="cStatus" placeholder="Device status feed key (optional)" autocapitalize="off" autocomplete="off" spellcheck="false" style="margin-top:10px">
-      <p style="color:var(--dim);font-size:12.5px;line-height:1.45;margin:8px 2px 0">The device sends a heartbeat to the status feed. That is how this page knows it is online.</p>
+      <input id="cStatus" placeholder="Device status feed key (required)" autocapitalize="off" autocomplete="off" spellcheck="false" style="margin-top:10px">
+      <p style="color:var(--dim);font-size:12.5px;line-height:1.45;margin:8px 2px 0">The device publishes online/offline and battery to this feed. This page listens live, so no polling.</p>
       <div class="err" id="setErr"></div>
       <button class="btn" id="saveSet" style="margin-top:4px">Save and test</button>
       <button class="link" id="wipeSet" style="margin-top:10px;width:100%">Remove saved settings</button>
@@ -152,6 +162,15 @@ textarea{resize:none;min-height:120px;line-height:1.5}
     <div class="card dev off" id="dev">
       <span class="d"></span>
       <div><div class="devtx" id="devTx">Device status not set up</div><div class="devsub" id="devSub">Add a status feed in settings</div></div>
+    </div>
+
+    <div class="card" id="batt">
+      <div class="top"><h2>Battery</h2><span class="count" id="bSeen"></span></div>
+      <div class="brow">
+        <div class="bicon"><i id="bFill"></i></div>
+        <div><div class="bpct" id="bPct">–</div><div class="devsub" id="bVolt">Waiting for device</div></div>
+        <div class="beta"><b id="bEta">–</b><span>est. left</span></div>
+      </div>
     </div>
 
     <div class="card" style="animation:rise .6s .08s both">
@@ -185,13 +204,13 @@ textarea{resize:none;min-height:120px;line-height:1.5}
 let cfg = LS_get("hc_cfg", {user:"",key:"",feed:"",status:""});
 function LS_get(k,d){ try{ const v=localStorage.getItem(k); return v===null?d:JSON.parse(v) }catch(e){ return d } }
 const isConfigured = () => !!(cfg.user && cfg.key && cfg.feed);
-const statusBase = () => `https://io.adafruit.com/api/v2/${encodeURIComponent(cfg.user)}/feeds/${encodeURIComponent(cfg.status)}`;
 const apiBase = () => `https://io.adafruit.com/api/v2/${encodeURIComponent(cfg.user)}/feeds/${encodeURIComponent(cfg.feed)}`;
+const statusBase = () => `https://io.adafruit.com/api/v2/${encodeURIComponent(cfg.user)}/feeds/${encodeURIComponent(cfg.status)}`;
 
 const $ = id => document.getElementById(id);
-/* Settings, password hash and login session are saved in localStorage and mirrored to IndexedDB,
+/* Settings, password hash, login session and battery history are saved in localStorage and mirrored to IndexedDB,
    so they survive closing the app, reloads, and the browser clearing one of the two. */
-const KEEP=["hc_cfg","hc_hash","hc_session","hc_lastseen"];
+const KEEP=["hc_cfg","hc_hash","hc_session","hc_lastseen","hc_batt"];
 const idb=()=>new Promise((res,rej)=>{ const r=indexedDB.open("hc",1); r.onupgradeneeded=()=>r.result.createObjectStore("kv"); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error) });
 async function mirror(){ try{ const db=await idb(), st=db.transaction("kv","readwrite").objectStore("kv");
   KEEP.forEach(k=>{ const v=localStorage.getItem(k); v===null?st.delete(k):st.put(v,k) }) }catch(e){} }
@@ -300,7 +319,7 @@ function bump(k){
   LS.set("hc_stats",s); renderStats();
 }
 
-/* ---------- connection ---------- */
+/* ---------- connection (one-off checks only, no interval polling) ---------- */
 let state="unknown", pingT;
 function setStatus(s,text){
   const pill=$("pill"); pill.className="pill "+(s==="ok"?"ok":s==="bad"?"bad":"");
@@ -321,46 +340,138 @@ async function checkConn(first){
     else if(r.status===404) setStatus("bad","Feed not found");
     else setStatus("bad","Error "+r.status);
   }catch(e){ setStatus("bad","Can't reach Adafruit IO") }
-  if(first){ clearInterval(pingT); pingT=setInterval(()=>{ if(!document.hidden) checkConn() },30000) }
 }
-addEventListener("online",()=>checkConn());
+addEventListener("online",()=>{ checkConn(); mqttWake() });
 addEventListener("offline",()=>setStatus("bad","Offline"));
-document.addEventListener("visibilitychange",()=>{ if(!document.hidden && !$("app").classList.contains("hidden")){ checkConn(); pollDevice() } });
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden && !$("app").classList.contains("hidden")){ checkConn(); mqttWake() } });
 
-/* ---------- device presence (heartbeat feed) ---------- */
-const HB_WINDOW=90000;           // device counts as online if its last heartbeat is newer than this
-let hbTs=LS.get("hc_lastseen",0), devWas=null, hbT, tickT;
+/* ---------- device presence + battery: pushed over MQTT/WebSocket, no polling ---------- */
+const enc=new TextEncoder(), dec=new TextDecoder();
+const mStr=s=>{ const b=enc.encode(s); return [b.length>>8,b.length&255,...b] };
+function mPkt(type,body){ const h=[type]; let n=body.length; do{ let d=n%128; n=Math.floor(n/128); h.push(n?d|128:d) }while(n); return new Uint8Array([...h,...body]) }
+const MQTT_PATHS=["/mqtt","/mqtt/","/"];   // tried in order until one connects
+let ws=null, mqttUp=false, everUp=false, mqttDead=true, mqttBuf=new Uint8Array(0), mqttRetry, mqttPing, pathIdx=0, lastRx=0, tickT;
+let devOnline=null, devWas=null, hbTs=LS.get("hc_lastseen",0), linkFail=false;
+const topic=()=>`${cfg.user}/feeds/${cfg.status}`;
+const mqttSend=a=>{ if(ws&&ws.readyState===1) ws.send(a) };
+
+function mqttOpen(){
+  clearTimeout(mqttRetry); let opened=false;
+  const sock=new WebSocket("wss://io.adafruit.com:443"+MQTT_PATHS[pathIdx],"mqtt");
+  ws=sock; sock.binaryType="arraybuffer";
+  sock.onopen=()=>{ opened=true;
+    const id="hc-web-"+Math.random().toString(16).slice(2,10);
+    sock.send(mPkt(0x10,[...mStr("MQTT"),4,0xC2,0,60,...mStr(id),...mStr(cfg.user),...mStr(cfg.key)])) };
+  sock.onmessage=e=>{
+    lastRx=Date.now();
+    const nb=new Uint8Array(e.data), m=new Uint8Array(mqttBuf.length+nb.length); m.set(mqttBuf); m.set(nb,mqttBuf.length); mqttBuf=m;
+    while(mqttBuf.length>=2){
+      let i=1,len=0,mul=1,b;
+      do{ if(i>=mqttBuf.length) return; b=mqttBuf[i++]; len+=(b&127)*mul; mul*=128 }while(b&128);
+      if(mqttBuf.length<i+len) return;
+      const t=mqttBuf[0], body=mqttBuf.slice(i,i+len); mqttBuf=mqttBuf.slice(i+len);
+      mqttPacket(t,body);
+    }
+  };
+  sock.onclose=()=>{
+    if(ws!==sock) return;
+    clearInterval(mqttPing); mqttUp=false; mqttBuf=new Uint8Array(0); renderDevice();
+    if(mqttDead) return;
+    if(!opened&&!everUp&&pathIdx<MQTT_PATHS.length-1){ pathIdx++; mqttOpen(); return }
+    if(!everUp) linkFail=true;
+    mqttRetry=setTimeout(()=>{ if(!everUp) pathIdx=0; mqttOpen() },4000);
+  };
+}
+function mqttPacket(t,b){
+  const type=t>>4;
+  if(type===2){                                   // CONNACK
+    if(b[1]!==0){ mqttDead=true; mqttUp=false; toast(b[1]===4||b[1]===5?"Bad Adafruit username or key":"MQTT refused ("+b[1]+")"); ws.close(); return }
+    mqttUp=true; everUp=true; linkFail=false;
+    mqttSend(mPkt(0x82,[0,1,...mStr(topic()),0]));        // subscribe
+    mqttSend(mPkt(0x30,mStr(topic()+"/get")));            // ask IO to resend the latest value once
+    clearInterval(mqttPing); mqttPing=setInterval(()=>mqttSend(new Uint8Array([0xC0,0])),30000);
+    renderDevice();
+  } else if(type===3){                            // PUBLISH
+    const tl=(b[0]<<8)|b[1]; let o=2+tl; if((t>>1)&3) o+=2;
+    onStatus(dec.decode(b.slice(o)));
+  }
+}
+function mqttStart(){ mqttStop(); if(!cfg.user||!cfg.key||!cfg.status) return; mqttDead=false; pathIdx=0; everUp=false; linkFail=false; mqttOpen() }
+function mqttStop(){ mqttDead=true; clearTimeout(mqttRetry); clearInterval(mqttPing); mqttUp=false; try{ ws&&ws.close() }catch(e){} ws=null }
+function mqttWake(){   // phones kill background sockets; reconnect the moment the page is visible again
+  if(mqttDead) return;
+  if(!ws||ws.readyState>1||Date.now()-lastRx>45000){ try{ ws&&ws.close() }catch(e){} ws=null; mqttUp=false; mqttOpen() }
+}
+
+function onStatus(txt){
+  let d; try{ d=JSON.parse(txt) }catch(e){ d=null }
+  if(!d||typeof d!=="object") d={s:String(txt).trim().toLowerCase()};
+  const on=String(d.s).toLowerCase()==="online";
+  if(devWas!==null&&on!==devWas){
+    if(on){ log("ok","Device online","Powered on"); toast("Device is online"); const el=$("dev"); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash") }
+    else { log("bad","Device offline","Connection lost"); toast("Device went offline") }
+  }
+  devWas=devOnline=on;
+  if(on){ hbTs=Date.now(); LS.set("hc_lastseen",hbTs) }
+  if(on&&typeof d.p==="number") battUpdate(Math.round(d.p),typeof d.v==="number"?d.v:null);
+  renderDevice(); renderBatt();
+}
+
 function ago(ms){
   const s=Math.max(0,Math.round(ms/1000));
   return s<5?"just now":s<60?s+"s ago":s<3600?Math.floor(s/60)+" min ago":fmt(Date.now()-ms);
 }
 function renderDevice(){
   const el=$("dev"); if(!el) return;
-  if(!cfg.status){ el.className="card dev off"; $("devTx").textContent="Device status not set up"; $("devSub").textContent="Add a status feed in settings"; devWas=null; return }
-  const online=hbTs>0 && Date.now()-hbTs<HB_WINDOW;
-  if(devWas!==null && online!==devWas){
-    if(online){ log("ok","Device online","Heartbeat received"); toast("Device is back online"); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
-    else log("bad","Device offline","No heartbeat for "+Math.round(HB_WINDOW/1000)+"s");
-  }
-  devWas=online;
-  el.classList.toggle("on",online); el.classList.toggle("off",!online);
-  $("devTx").textContent=online?"Device online":"Device offline";
-  $("devSub").textContent=online?"Last heartbeat "+ago(Date.now()-hbTs):(hbTs?"Last online "+fmt(hbTs)+" ("+ago(Date.now()-hbTs)+")":"No heartbeat yet");
-}
-async function pollDevice(){
-  if(!cfg.user||!cfg.key||!cfg.status||!navigator.onLine) return;
-  try{
-    const r=await fetch(statusBase()+"/data/last",{headers:{"X-AIO-Key":cfg.key}});
-    if(r.ok){ const d=await r.json(), t=d&&d.created_at?Date.parse(d.created_at):0; if(t&&t>hbTs){ hbTs=t; LS.set("hc_lastseen",t) } }
-  }catch(e){}
-  renderDevice();
+  const set=(cls,tx,sub)=>{ el.classList.remove("on","off"); if(cls) el.classList.add(cls); $("devTx").textContent=tx; $("devSub").textContent=sub };
+  if(!cfg.status) return set("off","Device status not set up","Add a status feed in settings");
+  if(!mqttUp) return set("",linkFail?"Live link unavailable":"Connecting…",linkFail?"Can't reach Adafruit IO live link, retrying":"Live link down, reconnecting");
+  if(devOnline===null) return set("","Waiting for device","No status received yet");
+  if(devOnline) set("on","Device online","Last report "+ago(Date.now()-hbTs));
+  else set("off","Device offline",hbTs?"Last seen "+ago(Date.now()-hbTs):"Offline");
 }
 function startDevice(){
-  stopDevice(); renderDevice();
-  tickT=setInterval(renderDevice,1000);
-  if(cfg.status){ pollDevice(); hbT=setInterval(()=>{ if(!document.hidden) pollDevice() },5000) }
+  stopDevice(); renderDevice(); renderBatt();
+  tickT=setInterval(()=>{ renderDevice(); renderBatt(); if(mqttUp&&Date.now()-lastRx>75000) mqttWake() },1000);
+  mqttStart();
 }
-function stopDevice(){ clearInterval(hbT); clearInterval(tickT); devWas=null }
+function stopDevice(){ mqttStop(); clearInterval(tickT); devOnline=devWas=null }
+
+/* ---------- battery + estimated hours left ---------- */
+let batt=LS.get("hc_batt",{p:null,v:null,ts:0,s:[],chg:false});
+function battUpdate(p,v){
+  const now=Date.now(), prev=batt.s[batt.s.length-1];
+  if(prev){
+    if(p>prev[1]+2){ batt.s=[]; batt.chg=true }                       // clear rise = charging, old drain trend is void
+    else if(p<prev[1]){ if(batt.chg) batt.s=[]; batt.chg=false }       // unplugged: start a fresh drain trend
+  }
+  batt.p=p; batt.v=v; batt.ts=now;
+  const last=batt.s[batt.s.length-1];
+  if(!last||now-last[0]>=300000) batt.s.push([now,p]);                                        // one sample per 5 min
+  batt.s=batt.s.filter(x=>now-x[0]<8*3600e3).slice(-200);
+  LS.set("hc_batt",batt);
+}
+function battEta(){            // linear fit of % vs time, then % left / drain rate
+  const s=batt.s, n=s.length; if(n<3||batt.chg) return null;
+  const t0=s[0][0], xs=s.map(a=>(a[0]-t0)/3600e3), ys=s.map(a=>a[1]);
+  if(xs[n-1]<0.5||ys[0]-ys[n-1]<2) return null;           // need ≥30 min and ≥2% drop or it's noise
+  const sx=xs.reduce((a,b)=>a+b),sy=ys.reduce((a,b)=>a+b),sxy=xs.reduce((a,x,i)=>a+x*ys[i],0),sxx=xs.reduce((a,x)=>a+x*x,0);
+  const slope=(n*sxy-sx*sy)/(n*sxx-sx*sx);
+  return slope<-0.05?ys[n-1]/-slope:null;
+}
+function renderBatt(){
+  const card=$("batt"); if(!card) return;
+  if(batt.p==null){ $("bPct").textContent="–"; $("bVolt").textContent=cfg.status?"Waiting for device":"Set up status feed"; $("bEta").textContent="–"; $("bFill").style.width="0"; $("bSeen").textContent=""; return }
+  const p=batt.p, f=$("bFill");
+  f.style.width=Math.max(4,p)+"%"; f.style.background=p<=15?"var(--bad)":p<=30?"var(--warn)":"var(--ok)";
+  $("bPct").textContent=p+"%";
+  $("bVolt").textContent=(batt.v!=null?batt.v.toFixed(2)+" V":"")+(batt.chg?" · charging":"");
+  const eta=battEta();
+  $("bEta").textContent=batt.chg?(p>=100?"Full":"Charging"):eta==null?(p>=100?"Full":"Learning…"):"~"+(eta<1?Math.round(eta*60)+" min":(eta<10?eta.toFixed(1):Math.round(eta))+" h");
+  const live=devOnline===true;
+  card.classList.toggle("stale",!live);
+  $("bSeen").textContent=live?"Live":"Last reported "+ago(Date.now()-batt.ts);
+}
 
 /* ---------- send ---------- */
 let sending=false;
@@ -395,13 +506,13 @@ function openSettings(focus){
 const cUserOrKey = () => !cfg.user ? "cUser" : !cfg.key ? "cKey" : "cFeed";
 async function saveSettings(){
   const u=$("cUser").value.trim(), k=$("cKey").value.trim(), f=$("cFeed").value.trim().toLowerCase(), st=$("cStatus").value.trim().toLowerCase(), err=$("setErr"), b=$("saveSet");
-  if(!u||!k||!f){ err.textContent="Fill in all three fields."; return }
+  if(!u||!k||!f){ err.textContent="Fill in username, key and message feed."; return }
   const old=cfg; cfg={user:u,key:k,feed:f,status:st};
   b.disabled=true; b.textContent="Testing…"; err.textContent="";
   try{
     const r=await fetch(apiBase(),{headers:{"X-AIO-Key":cfg.key}});
     if(!r.ok) throw new Error(r.status===401||r.status===403?"Username or key is wrong.":r.status===404?"Feed not found. Check the feed key.":"Adafruit returned "+r.status);
-    if(st){ const r2=await fetch(statusBase(),{headers:{"X-AIO-Key":cfg.key}}); if(!r2.ok) throw new Error("Status feed not found. Check the feed key."); }
+    if(st){ const r2=await fetch(statusBase(),{headers:{"X-AIO-Key":cfg.key}}); if(!r2.ok) throw new Error("Status feed not found. Create it in Adafruit IO or check the key."); }
   }catch(e){
     cfg=old; err.textContent=e.message==="Failed to fetch"?"Can't reach Adafruit IO. Check your connection.":e.message;
     b.disabled=false; b.textContent="Save and test"; return;
@@ -412,7 +523,7 @@ async function saveSettings(){
   state="unknown"; checkConn(true); startDevice();
 }
 function wipeSettings(){
-  LS.del("hc_cfg"); cfg={user:"",key:"",feed:"",status:""}; clearInterval(pingT); state="unknown"; stopDevice(); renderDevice();
+  LS.del("hc_cfg"); cfg={user:"",key:"",feed:"",status:""}; clearInterval(pingT); state="unknown"; stopDevice(); renderDevice(); renderBatt();
   $("settings").classList.add("hidden"); setStatus("bad","Not set up"); toast("Settings removed");
 }
 
@@ -438,7 +549,7 @@ $("clearBtn").addEventListener("click",()=>{
 $("fReset").addEventListener("click",()=>{ $("fDay").value=""; $("fHour").value=""; renderHist() });
 
 /* stay logged in across reloads until LOCK */
-restore().then(()=>{ cfg=LS.get("hc_cfg",cfg); (LS.get("hc_session",null) && storedHash()) ? showApp() : showLogin(); });
+restore().then(()=>{ cfg=LS.get("hc_cfg",cfg); batt=LS.get("hc_batt",batt); hbTs=LS.get("hc_lastseen",hbTs); (LS.get("hc_session",null) && storedHash()) ? showApp() : showLogin(); });
 </script>
 </body>
 </html>
