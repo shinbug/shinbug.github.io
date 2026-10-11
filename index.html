@@ -406,7 +406,9 @@ function mqttWake(){   // phones kill background sockets; reconnect the moment t
 function onStatus(txt){
   let d; try{ d=JSON.parse(txt) }catch(e){ d=null }
   if(!d||typeof d!=="object") d={s:String(txt).trim().toLowerCase()};
-  const on=String(d.s).toLowerCase()==="online";
+  const sv=String(d.s).toLowerCase();
+  if(sv!=="online"&&sv!=="offline") return;      // old heartbeat values or anything else: ignore, never guess "offline"
+  const on=sv==="online";
   if(devWas!==null&&on!==devWas){
     if(on){ log("ok","Device online","Powered on"); toast("Device is online"); const el=$("dev"); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash") }
     else { log("bad","Device offline","Connection lost"); toast("Device went offline") }
@@ -426,7 +428,7 @@ function renderDevice(){
   const set=(cls,tx,sub)=>{ el.classList.remove("on","off"); if(cls) el.classList.add(cls); $("devTx").textContent=tx; $("devSub").textContent=sub };
   if(!cfg.status) return set("off","Device status not set up","Add a status feed in settings");
   if(!mqttUp) return set("",linkFail?"Live link unavailable":"Connecting…",linkFail?"Can't reach Adafruit IO live link, retrying":"Live link down, reconnecting");
-  if(devOnline===null) return set("","Waiting for device","No status received yet");
+  if(devOnline===null) return set("","Waiting for device","Nothing yet. Feed key must match STATUS_FEED on the board");
   if(devOnline) set("on","Device online","Last report "+ago(Date.now()-hbTs));
   else set("off","Device offline",hbTs?"Last seen "+ago(Date.now()-hbTs):"Offline");
 }
