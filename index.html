@@ -325,9 +325,12 @@ function setStatus(s,text){
   const pill=$("pill"); pill.className="pill "+(s==="ok"?"ok":s==="bad"?"bad":"");
   $("pillTx").textContent=text;
   if(s!==state){
-    if(s==="ok") log("ok","Connected","Adafruit IO is reachable");
-    if(s==="bad") log("bad","Disconnected",text);
     state=s;
+    if(s!==LS.get("hc_conn","")){          // remembered across reloads so a refresh doesn't spam the log
+      LS.set("hc_conn",s);
+      if(s==="ok") log("ok","Connected","Adafruit IO is reachable");
+      if(s==="bad") log("bad","Disconnected",text);
+    }
   }
 }
 async function checkConn(first){
@@ -345,13 +348,16 @@ addEventListener("online",()=>{ checkConn(); mqttWake() });
 addEventListener("offline",()=>setStatus("bad","Offline"));
 document.addEventListener("visibilitychange",()=>{ if(!document.hidden && !$("app").classList.contains("hidden")){ checkConn(); mqttWake() } });
 
-/* ---------- device presence + battery: pushed over MQTT/WebSocket, no polling ---------- */
+/* ---------- device presence + battery ----------
+   Primary: pushed live over MQTT/WebSocket (no polling).
+   Fallback: if the live link can't open, check the status feed over HTTP every 10 s until it can. */
 const enc=new TextEncoder(), dec=new TextDecoder();
 const mStr=s=>{ const b=enc.encode(s); return [b.length>>8,b.length&255,...b] };
 function mPkt(type,body){ const h=[type]; let n=body.length; do{ let d=n%128; n=Math.floor(n/128); h.push(n?d|128:d) }while(n); return new Uint8Array([...h,...body]) }
 const MQTT_PATHS=["/mqtt","/mqtt/","/"];   // tried in order until one connects
-let ws=null, mqttUp=false, everUp=false, mqttDead=true, mqttBuf=new Uint8Array(0), mqttRetry, mqttPing, pathIdx=0, lastRx=0, tickT;
-let devOnline=null, devWas=null, hbTs=LS.get("hc_lastseen",0), linkFail=false;
+const STALE_MS=60000;                      // device publishes every 15 s; an "online" older than this means it stopped
+let ws=null, mqttUp=false, everUp=false, mqttDead=true, mqttBuf=new Uint8Array(0), mqttRetry, mqttPing, pathIdx=0, retryN=0, lastRx=0, tickT;
+let polling=false, pollT, devOnline=null, devWas=null, hbTs=LS.get("hc_lastseen",0);
 const topic=()=>`${cfg.user}/feeds/${cfg.status}`;
 const mqttSend=a=>{ if(ws&&ws.readyState===1) ws.send(a) };
 
@@ -375,18 +381,20 @@ function mqttOpen(){
   };
   sock.onclose=()=>{
     if(ws!==sock) return;
-    clearInterval(mqttPing); mqttUp=false; mqttBuf=new Uint8Array(0); renderDevice();
-    if(mqttDead) return;
-    if(!opened&&!everUp&&pathIdx<MQTT_PATHS.length-1){ pathIdx++; mqttOpen(); return }
-    if(!everUp) linkFail=true;
-    mqttRetry=setTimeout(()=>{ if(!everUp) pathIdx=0; mqttOpen() },4000);
+    clearInterval(mqttPing); mqttUp=false; mqttBuf=new Uint8Array(0);
+    if(mqttDead){ renderDevice(); return }
+    if(!opened&&!everUp&&pathIdx<MQTT_PATHS.length-1){ pathIdx++; mqttOpen(); return }   // next path right away
+    if(!everUp) startPoll();                                                              // live link never worked: fall back to HTTP checks
+    const delay=Math.min((everUp?4000:20000)*2**Math.min(retryN,3),90000); retryN++;      // back off: Adafruit bans >20 logins/min
+    mqttRetry=setTimeout(()=>{ if(!everUp) pathIdx=0; mqttOpen() },delay);
+    renderDevice();
   };
 }
 function mqttPacket(t,b){
   const type=t>>4;
   if(type===2){                                   // CONNACK
     if(b[1]!==0){ mqttDead=true; mqttUp=false; toast(b[1]===4||b[1]===5?"Bad Adafruit username or key":"MQTT refused ("+b[1]+")"); ws.close(); return }
-    mqttUp=true; everUp=true; linkFail=false;
+    mqttUp=true; everUp=true; retryN=0; stopPoll();
     mqttSend(mPkt(0x82,[0,1,...mStr(topic()),0]));        // subscribe
     mqttSend(mPkt(0x30,mStr(topic()+"/get")));            // ask IO to resend the latest value once
     clearInterval(mqttPing); mqttPing=setInterval(()=>mqttSend(new Uint8Array([0xC0,0])),30000);
@@ -396,25 +404,38 @@ function mqttPacket(t,b){
     onStatus(dec.decode(b.slice(o)));
   }
 }
-function mqttStart(){ mqttStop(); if(!cfg.user||!cfg.key||!cfg.status) return; mqttDead=false; pathIdx=0; everUp=false; linkFail=false; mqttOpen() }
-function mqttStop(){ mqttDead=true; clearTimeout(mqttRetry); clearInterval(mqttPing); mqttUp=false; try{ ws&&ws.close() }catch(e){} ws=null }
+function mqttStart(){ mqttStop(); if(!cfg.user||!cfg.key||!cfg.status) return; mqttDead=false; pathIdx=0; retryN=0; everUp=false; mqttOpen() }
+function mqttStop(){ mqttDead=true; clearTimeout(mqttRetry); clearInterval(mqttPing); stopPoll(); mqttUp=false; try{ ws&&ws.close() }catch(e){} ws=null }
 function mqttWake(){   // phones kill background sockets; reconnect the moment the page is visible again
   if(mqttDead) return;
-  if(!ws||ws.readyState>1||Date.now()-lastRx>45000){ try{ ws&&ws.close() }catch(e){} ws=null; mqttUp=false; mqttOpen() }
+  if(!ws||ws.readyState>1||Date.now()-lastRx>45000){ try{ ws&&ws.close() }catch(e){} ws=null; mqttUp=false; if(!everUp) pathIdx=0; mqttOpen() }
 }
 
-function onStatus(txt){
+/* HTTP fallback */
+function startPoll(){ if(polling) return; polling=true; pollStatus(); pollT=setInterval(()=>{ if(!document.hidden) pollStatus() },10000) }
+function stopPoll(){ polling=false; clearInterval(pollT) }
+async function pollStatus(){
+  if(!cfg.user||!cfg.key||!cfg.status||!navigator.onLine) return;
+  try{
+    const r=await fetch(statusBase()+"/data/last",{headers:{"X-AIO-Key":cfg.key}});
+    if(!r.ok||!polling) return;
+    const d=await r.json();
+    if(d&&d.value!=null) onStatus(String(d.value), d.created_at?Date.parse(d.created_at):0);
+  }catch(e){}
+}
+
+function onStatus(txt,ts){
   let d; try{ d=JSON.parse(txt) }catch(e){ d=null }
   if(!d||typeof d!=="object") d={s:String(txt).trim().toLowerCase()};
   const sv=String(d.s).toLowerCase();
   if(sv!=="online"&&sv!=="offline") return;      // old heartbeat values or anything else: ignore, never guess "offline"
-  const on=sv==="online";
+  if(sv==="online"){ hbTs=ts||Date.now(); LS.set("hc_lastseen",hbTs) }
+  const on=sv==="online"&&!(ts&&Date.now()-ts>STALE_MS);   // (HTTP fallback only) a stale "online" means the device stopped
   if(devWas!==null&&on!==devWas){
     if(on){ log("ok","Device online","Powered on"); toast("Device is online"); const el=$("dev"); el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash") }
     else { log("bad","Device offline","Connection lost"); toast("Device went offline") }
   }
   devWas=devOnline=on;
-  if(on){ hbTs=Date.now(); LS.set("hc_lastseen",hbTs) }
   if(on&&typeof d.p==="number") battUpdate(Math.round(d.p),typeof d.v==="number"?d.v:null);
   renderDevice(); renderBatt();
 }
@@ -427,10 +448,11 @@ function renderDevice(){
   const el=$("dev"); if(!el) return;
   const set=(cls,tx,sub)=>{ el.classList.remove("on","off"); if(cls) el.classList.add(cls); $("devTx").textContent=tx; $("devSub").textContent=sub };
   if(!cfg.status) return set("off","Device status not set up","Add a status feed in settings");
-  if(!mqttUp) return set("",linkFail?"Live link unavailable":"Connecting…",linkFail?"Can't reach Adafruit IO live link, retrying":"Live link down, reconnecting");
+  if(!mqttUp&&!polling) return set("","Connecting…","Opening live link");
   if(devOnline===null) return set("","Waiting for device","Nothing yet. Feed key must match STATUS_FEED on the board");
-  if(devOnline) set("on","Device online","Last report "+ago(Date.now()-hbTs));
-  else set("off","Device offline",hbTs?"Last seen "+ago(Date.now()-hbTs):"Offline");
+  const via=mqttUp?"":" · live link unavailable, checking every 10 s";
+  if(devOnline) set("on","Device online","Last report "+ago(Date.now()-hbTs)+via);
+  else set("off","Device offline",(hbTs?"Last seen "+ago(Date.now()-hbTs):"Offline")+via);
 }
 function startDevice(){
   stopDevice(); renderDevice(); renderBatt();
